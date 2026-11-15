@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function getBadgeClass(verdict) {
     if (!verdict) return "badge-insufficient";
     if (verdict.includes("Supported") || verdict.includes("Authentic") || verdict.includes("Verified")) return "badge-supported";
-    if (verdict.includes("False") || verdict.includes("Debunked")) return "badge-false";
+    if (verdict.includes("False") || verdict.includes("Debunked") || verdict.includes("Sensational") || verdict.includes("War Claim")) return "badge-false";
     if (verdict.includes("Misleading")) return "badge-misleading";
     if (verdict.includes("Unverified")) return "badge-unverified";
     return "badge-insufficient";
@@ -86,7 +86,7 @@ function getBadgeClass(verdict) {
 function getVerdictIcon(verdict) {
     if (!verdict) return "fa-circle-info";
     if (verdict.includes("Supported") || verdict.includes("Authentic") || verdict.includes("Verified")) return "fa-circle-check";
-    if (verdict.includes("False") || verdict.includes("Debunked")) return "fa-circle-xmark";
+    if (verdict.includes("False") || verdict.includes("Debunked") || verdict.includes("Sensational") || verdict.includes("War Claim")) return "fa-triangle-exclamation";
     if (verdict.includes("Misleading")) return "fa-triangle-exclamation";
     if (verdict.includes("Unverified")) return "fa-circle-question";
     return "fa-circle-info";
@@ -135,7 +135,7 @@ function renderNewsResult(data) {
     confidenceBar.style.width = `${score}%`;
     if (data.verdict && (data.verdict.includes("Supported") || data.verdict.includes("Authentic") || data.verdict.includes("Verified"))) {
         confidenceBar.style.backgroundColor = "#10b981";
-    } else if (data.verdict && (data.verdict.includes("False") || data.verdict.includes("Debunked"))) {
+    } else if (data.verdict && (data.verdict.includes("False") || data.verdict.includes("Debunked") || data.verdict.includes("Sensational") || data.verdict.includes("War Claim"))) {
         confidenceBar.style.backgroundColor = "#ef4444";
     } else if (data.verdict && data.verdict.includes("Misleading")) {
         confidenceBar.style.backgroundColor = "#f59e0b";

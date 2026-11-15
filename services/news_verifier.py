@@ -26,6 +26,9 @@ MISLEADING_KEYWORDS = {
 SENSATIONAL_PATTERNS = [
     r"\b(shocking|unbelievable|miracle cure|they don't want you to know|mind-blowing)\b",
     r"\b(secret exposed|you won't believe|hidden truth|100% guaranteed)\b",
+    r"\b(war|counter attack|nuclear strike|world war|ww3|operation sindoor)\b",
+    r"\b(bada khulasa|hosh ud jayenge|khatra|tabahi machi|dhamaka)\b",
+    r"(काउंटर\s*अटैक|हमला|युद्ध|तबाही|बड़ा\s*खुलासा|होश\s*उड़|सनसनीखेज|सर्जिकल\s*स्ट्राइक|इस्लामाबाद\s*पर|लाहौर\s*पर)",
     r"[!?]{2,}",  # Repeated punctuation like ?? or !!
 ]
 

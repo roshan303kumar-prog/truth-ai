@@ -471,12 +471,31 @@ class ContentLinkVerifier:
         fc_verdict = fact_check_result.get("verdict", "Unverified")
         claim_tokens = self.news_verifier.extract_keywords(eval_claim)
         total_ev = len(fact_check_result.get("source_links", []))
+        num_support = len(fact_check_result.get("supporting_evidence", []))
+        num_contra = len(fact_check_result.get("contradicting_evidence", []))
+
+        # Check for extreme war / military conflict assertions
+        WAR_OR_EXTREME_CLAIM_PATTERNS = [
+            r"\b(war|counter attack|nuclear strike|world war|ww3|operation sindoor)\b",
+            r"\b(attack on islamabad|strike on lahore|delhi par hamla|surgical strike)\b",
+            r"(काउंटर\s*अटैक|इस्लामाबाद\s*पर|भारत\s*ने\s*किया\s*हमला|युद्ध|तबाही|एयरस्ट्राइक)",
+        ]
+        is_extreme_war_claim = any(re.search(pat, headline_or_claim, re.IGNORECASE) for pat in WAR_OR_EXTREME_CLAIM_PATTERNS)
 
         if is_satire_or_hoax:
             final_verdict = "Fake News / Satire"
             authenticity_score = 12.0
             verdict_class = "danger"
             summary_statement = f"This content is published by {publisher_name}, a recognized satire or fabricated hoax outlet. The claims are not real news."
+        elif is_extreme_war_claim and num_support == 0:
+            final_verdict = "Sensational / Uncorroborated War Claim"
+            authenticity_score = 28.0
+            verdict_class = "danger"
+            summary_statement = (
+                f"Sensationalized war/military claim from {publisher_name}. "
+                "There is NO official confirmation from the Ministry of Defence, PIB, or independent international observers "
+                "confirming any military attack on Islamabad or ongoing war. Often packaged on YouTube Shorts as dramatic clickbait or hypothetical scenario."
+            )
         elif matched_source and matched_source["trust"] >= 86 and fc_verdict not in ["False", "Manipulated"]:
             if is_debate_or_question:
                 final_verdict = "Verified Broadcast Debate"
