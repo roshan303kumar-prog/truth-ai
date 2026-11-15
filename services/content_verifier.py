@@ -72,6 +72,32 @@ KNOWN_SATIRE_OR_HOAX_SITES = {
     "newsworldindia.in": "Unverified / Sensational Blog",
 }
 
+# Verified Indian & Global YouTube News Channels & Public Broadcasters
+VERIFIED_YOUTUBE_NEWS_CHANNELS = {
+    "aaj tak": {"tier": "National Hindi Broadcaster", "trust": 90},
+    "india today": {"tier": "National News Network", "trust": 90},
+    "ndtv": {"tier": "National News Network", "trust": 90},
+    "ndtv india": {"tier": "National Hindi News", "trust": 90},
+    "bbc news": {"tier": "International Public Broadcaster", "trust": 95},
+    "bbc news hindi": {"tier": "International Public Broadcaster", "trust": 95},
+    "dd news": {"tier": "National Public Broadcaster", "trust": 96},
+    "sansad tv": {"tier": "Official Parliament Channel", "trust": 98},
+    "abp news": {"tier": "National News Network", "trust": 88},
+    "zee news": {"tier": "National News Network", "trust": 88},
+    "news18": {"tier": "National News Network", "trust": 88},
+    "news18 india": {"tier": "National News Network", "trust": 88},
+    "wion": {"tier": "International News Channel", "trust": 89},
+    "reuters": {"tier": "Global News Agency", "trust": 98},
+    "associated press": {"tier": "Global News Agency", "trust": 98},
+    "ani news": {"tier": "National News Agency", "trust": 90},
+    "the lallantop": {"tier": "Verified Digital Newsroom", "trust": 88},
+    "the print": {"tier": "Verified Digital News", "trust": 88},
+    "dw news": {"tier": "International Public Broadcaster", "trust": 94},
+    "al jazeera english": {"tier": "International News", "trust": 90},
+    "cnbc": {"tier": "Financial News Channel", "trust": 92},
+    "cnbc-tv18": {"tier": "Financial News Channel", "trust": 92},
+}
+
 
 class ContentLinkVerifier:
     """
@@ -115,12 +141,14 @@ class ContentLinkVerifier:
 
         # Extract video ID
         if "youtu.be" in parsed.netloc:
-            video_id = parsed.path.lstrip("/").split("&")[0]
+            video_id = parsed.path.lstrip("/").split("&")[0].split("?")[0]
         elif "youtube.com" in parsed.netloc:
             qs = urllib.parse.parse_qs(parsed.query)
             video_id = qs.get("v", [""])[0]
             if not video_id and "/embed/" in parsed.path:
-                video_id = parsed.path.split("/embed/")[1].split("/")[0]
+                video_id = parsed.path.split("/embed/")[1].split("/")[0].split("?")[0]
+            if not video_id and "/shorts/" in parsed.path:
+                video_id = parsed.path.split("/shorts/")[1].split("/")[0].split("?")[0]
 
         video_info = {
             "type": "video",
@@ -315,16 +343,30 @@ class ContentLinkVerifier:
         source_badge = "Unverified Online Source"
         source_category = "General Web"
         is_satire_or_hoax = False
-
-        # Match known verified outlets
         matched_source = None
-        for dom, meta in VERIFIED_NEWS_SOURCES.items():
-            if host == dom or host.endswith(f".{dom}"):
-                matched_source = meta
-                source_trust_score = meta["trust"]
-                source_badge = f"Verified: {meta['tier']}"
-                source_category = "Certified Press"
-                break
+
+        if is_video:
+            author_clean = publisher_name.lower().strip()
+            for ch_name, ch_meta in VERIFIED_YOUTUBE_NEWS_CHANNELS.items():
+                if ch_name in author_clean or author_clean in ch_name:
+                    matched_source = ch_meta
+                    source_trust_score = ch_meta["trust"]
+                    source_badge = f"Verified Newsroom: {ch_meta['tier']}"
+                    source_category = "Accredited Broadcast Press"
+                    break
+            if not matched_source:
+                source_trust_score = 55
+                source_badge = "Independent YouTube Channel / Creator"
+                source_category = "Online Video Platform"
+        else:
+            # Match known verified outlets
+            for dom, meta in VERIFIED_NEWS_SOURCES.items():
+                if host == dom or host.endswith(f".{dom}"):
+                    matched_source = meta
+                    source_trust_score = meta["trust"]
+                    source_badge = f"Verified: {meta['tier']}"
+                    source_category = "Certified Press"
+                    break
 
         # Check known satire / hoaxes
         for dom, label in KNOWN_SATIRE_OR_HOAX_SITES.items():
@@ -338,6 +380,10 @@ class ContentLinkVerifier:
         # 3. Linguistic & Clickbait Check on Headline
         combined_text = f"{headline_or_claim} {content_summary}".strip()
         linguistics = self.news_verifier.analyze_linguistics(combined_text)
+
+        if is_video and not matched_source and linguistics.get("sensationalism_detected"):
+            source_trust_score = max(source_trust_score - 15, 25)
+            source_badge = "Sensational / Potential Clickbait Video"
 
         # 4. Fact-Checking Claim through NewsVerifier & Evidence Search
         eval_claim = headline_or_claim if len(headline_or_claim) > 10 else combined_text
