@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Link & URL Phishing Scanner — TRUTH AI{% endblock %}
+{% block title %}Link Scanner & News/Video Fact-Checker — TRUTH AI{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -8,12 +8,24 @@
         <div class="col-lg-9">
             <!-- Header -->
             <div class="text-center mb-4">
-                <span class="hero-pill mb-2"><i class="fa-solid fa-shield-virus text-info"></i> Phishing & URL Forensics Engine</span>
-                <h1 class="fw-bold mb-2">Detect Fake, Fraud & Suspicious Links</h1>
+                <span class="hero-pill mb-2"><i class="fa-solid fa-shield-virus text-info"></i> Intelligent Link & Content Forensics</span>
+                <h1 class="fw-bold mb-2">Verify Links, News Articles & Videos</h1>
                 <p class="text-secondary">
-                    Analyze links received on WhatsApp, SMS, or Email before clicking.
-                    Inspect domain spoofing, fake banking portals, abusive TLDs, and certified safe institutions.
+                    Check if a web link is safe from phishing, or paste any News article or YouTube video link to verify if the story is <b>True, Misleading, or Fake</b>.
                 </p>
+
+                <!-- Mode Selector Pills -->
+                <div class="d-inline-flex p-1 rounded-pill bg-dark border border-secondary border-opacity-50 mt-2 gap-1">
+                    <button type="button" class="btn btn-sm rounded-pill px-3 py-1 mode-pill-btn active" data-mode="all" id="mode-all-btn">
+                        <i class="fa-solid fa-wand-magic-sparkles me-1 text-info"></i> Smart Auto-Detect
+                    </button>
+                    <button type="button" class="btn btn-sm rounded-pill px-3 py-1 mode-pill-btn text-secondary" data-mode="content" id="mode-content-btn">
+                        <i class="fa-regular fa-newspaper me-1 text-primary"></i> News & Video Fact-Check
+                    </button>
+                    <button type="button" class="btn btn-sm rounded-pill px-3 py-1 mode-pill-btn text-secondary" data-mode="security" id="mode-security-btn">
+                        <i class="fa-solid fa-shield-halved me-1 text-warning"></i> Phishing & Fraud Link
+                    </button>
+                </div>
             </div>
 
             <!-- Input Card -->
@@ -21,8 +33,8 @@
                 <form id="link-verify-form">
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label for="url-input" class="form-label text-white fw-semibold mb-0">
-                                Enter Web Link or URL <span class="text-danger">*</span>
+                            <label for="url-input" id="url-input-label" class="form-label text-white fw-semibold mb-0">
+                                Enter News Link, YouTube Video, or Web URL <span class="text-danger">*</span>
                             </label>
                             <div class="d-flex gap-2">
                                 <button type="button" id="paste-btn" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1" title="Paste from clipboard">
@@ -38,18 +50,18 @@
                         </div>
                         <div class="input-group">
                             <span class="input-group-text bg-dark border-secondary border-opacity-50 text-info">
-                                <i class="fa-solid fa-link"></i>
+                                <i id="url-type-icon" class="fa-solid fa-link"></i>
                             </span>
-                            <input type="text" id="url-input" class="form-control truth-input" placeholder="e.g. http://sbi-kyc-verify-update.xyz or https://www.amazon.in" required autocomplete="off">
+                            <input type="text" id="url-input" class="form-control truth-input" placeholder="e.g. https://www.ndtv.com/article..., https://youtube.com/watch?v=..., or http://sbi-kyc.xyz" required autocomplete="off">
                         </div>
                     </div>
 
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                         <div class="text-secondary small">
-                            <i class="fa-solid fa-shield-halved text-info me-1"></i> Real-time forensic scan: Typosquatting, TLD abuse & certified domain whitelist
+                            <i class="fa-solid fa-shield-halved text-info me-1"></i> Real-time dual engine: Source credibility, claim fact-check & phishing heuristics
                         </div>
                         <button type="submit" id="link-submit-btn" class="btn btn-truth-primary px-4 py-2">
-                            <i class="fa-solid fa-shield-heart me-2"></i> Scan Link Now
+                            <i class="fa-solid fa-magnifying-glass me-2"></i> Verify Link Now
                         </button>
                     </div>
                 </form>
@@ -58,68 +70,125 @@
             <!-- Analysis Progress Overlay -->
             <div id="analysis-progress" class="truth-card analysis-progress-overlay mb-4">
                 <div class="analysis-spinner"></div>
-                <h4 class="text-white fw-bold mb-2">Forensic Link Audit in Progress</h4>
-                <p class="text-secondary small">Extracting URL architecture, verifying institutional whitelist & scanning threat markers...</p>
+                <h4 class="text-white fw-bold mb-2">Analyzing Link & Content in Real-Time</h4>
+                <p class="text-secondary small">Extracting headline, inspecting publisher credibility & running multi-factor fact-checks...</p>
 
                 <ul class="progress-steps-list">
                     <li class="progress-step-item active" id="step-1">
-                        <i class="fa-solid fa-spinner fa-spin"></i> Parsing URL syntax, scheme & host structure
+                        <i class="fa-solid fa-spinner fa-spin"></i> Parsing URL syntax, domain authority & security headers
                     </li>
                     <li class="progress-step-item" id="step-2">
-                        <i class="fa-solid fa-circle-notch"></i> Cross-referencing certified institutional domain whitelist
+                        <i class="fa-solid fa-circle-notch"></i> Extracting article headline, video metadata & author details
                     </li>
                     <li class="progress-step-item" id="step-3">
-                        <i class="fa-solid fa-circle-notch"></i> Scanning brand impersonation, high-risk TLDs & urgency traps
+                        <i class="fa-solid fa-circle-notch"></i> Cross-referencing verified fact-check databases & credible news
                     </li>
                     <li class="progress-step-item" id="step-4">
-                        <i class="fa-solid fa-circle-notch"></i> Calculating risk score & formulating actionable safety guidance
+                        <i class="fa-solid fa-circle-notch"></i> Formulating accuracy verdict, safety badges & voice explanation
                     </li>
                 </ul>
             </div>
 
             <!-- Dynamic Result Card -->
             <div id="link-result-container" class="truth-card mb-4" style="display: none;">
-                <!-- Header / Verdict Bar -->
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25 gap-3">
-                    <div>
-                        <span class="text-secondary small text-uppercase d-block mb-1">Link Security Assessment</span>
-                        <div id="res-verdict-badge" class="verdict-badge">
-                            <i id="res-verdict-icon" class="fa-solid fa-circle-info"></i>
-                            <span id="res-verdict-text">Processing...</span>
+
+                <!-- 1. NEWS & VIDEO FACT-CHECK RESULT (Displayed when news/video link) -->
+                <div id="content-factcheck-section" class="mb-4 pb-4 border-bottom border-secondary border-opacity-25" style="display: none;">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                        <span class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25 px-3 py-1 rounded-pill">
+                            <i id="content-type-icon" class="fa-regular fa-newspaper me-1"></i> <span id="content-type-label">News Article Fact-Check</span>
+                        </span>
+                        <span id="content-publisher-badge" class="badge bg-dark border border-secondary text-light px-3 py-1 rounded-pill">
+                            Publisher: <span id="content-publisher-name" class="fw-bold text-info">General Source</span>
+                        </span>
+                    </div>
+
+                    <!-- Extracted Title / Headline -->
+                    <div class="p-3 mb-3 rounded bg-dark bg-opacity-50 border border-secondary border-opacity-25">
+                        <small class="text-secondary text-uppercase d-block mb-1">Extracted Headline / Claim</small>
+                        <h4 id="content-title-text" class="text-white fw-bold mb-1">Article Headline Here</h4>
+                        <small id="content-url-display" class="text-info text-break"></small>
+                    </div>
+
+                    <!-- Fact Check Verdict & Score -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+                        <div>
+                            <small class="text-secondary text-uppercase d-block mb-1">News Credibility Verdict</small>
+                            <div id="content-verdict-badge" class="verdict-badge">
+                                <i id="content-verdict-icon" class="fa-solid fa-circle-check"></i>
+                                <span id="content-verdict-text">Verified Authentic</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-secondary d-block">Content Authenticity Score</small>
+                            <span id="content-score-num" class="fs-4 fw-bold text-white">92%</span>
+                            <small id="content-score-label" class="d-block small text-success">Highly Credible</small>
                         </div>
                     </div>
-                    <div class="text-end">
-                        <span class="text-secondary small d-block">Threat Risk Score</span>
-                        <span id="res-risk-score" class="fs-4 fw-bold text-white">0%</span>
-                        <small id="res-risk-label" class="d-block small text-secondary">Low Risk</small>
+
+                    <!-- Authenticity Score Bar -->
+                    <div class="confidence-meter-container mb-3">
+                        <div id="content-score-bar" class="confidence-meter-bar" style="width: 90%;"></div>
+                    </div>
+
+                    <!-- Fact Check Summary Explanation -->
+                    <div class="p-3 rounded bg-dark border border-secondary border-opacity-25 mb-3">
+                        <h6 class="text-info fw-bold mb-2">
+                            <i class="fa-solid fa-file-circle-check me-1"></i> Fact-Check Finding (Khabar Ki Asliyat)
+                        </h6>
+                        <p id="content-explanation-text" class="text-white mb-0"></p>
+                    </div>
+
+                    <!-- Key Findings List -->
+                    <div class="mb-3">
+                        <h6 class="text-secondary small fw-bold text-uppercase mb-2">Detailed Analysis Highlights</h6>
+                        <div id="content-findings-list" class="d-flex flex-column gap-2"></div>
                     </div>
                 </div>
 
-                <!-- Risk Meter Bar -->
-                <div class="confidence-meter-container mb-4">
-                    <div id="res-risk-bar" class="confidence-meter-bar" style="width: 0%;"></div>
-                </div>
+                <!-- 2. LINK SECURITY ASSESSMENT (Phishing & Domain Checks) -->
+                <div id="security-audit-section">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25 gap-3">
+                        <div>
+                            <span class="text-secondary small text-uppercase d-block mb-1">URL Security & Fraud Check</span>
+                            <div id="res-verdict-badge" class="verdict-badge">
+                                <i id="res-verdict-icon" class="fa-solid fa-circle-info"></i>
+                                <span id="res-verdict-text">Processing...</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-secondary small d-block">Threat Risk Score</span>
+                            <span id="res-risk-score" class="fs-4 fw-bold text-white">0%</span>
+                            <small id="res-risk-label" class="d-block small text-secondary">Low Risk</small>
+                        </div>
+                    </div>
 
-                <!-- Transparent Explanation -->
-                <div class="p-3 mb-4 rounded bg-dark border border-secondary border-opacity-25">
-                    <h6 class="text-info fw-bold mb-2">
-                        <i class="fa-solid fa-brain me-1"></i> Security Forensic Analysis
-                    </h6>
-                    <p id="res-explanation-text" class="text-white mb-0"></p>
-                </div>
+                    <!-- Risk Meter Bar -->
+                    <div class="confidence-meter-container mb-4">
+                        <div id="res-risk-bar" class="confidence-meter-bar" style="width: 0%;"></div>
+                    </div>
 
-                <!-- Brand Impersonation Alert Banner (Conditional) -->
-                <div id="res-impersonation-alert" class="truth-alert alert-limitations mb-4" style="display: none; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.5); color: #fca5a5;">
-                    <h6 class="fw-bold mb-1 text-danger">
-                        <i class="fa-solid fa-triangle-exclamation me-1"></i> Phishing Alert: Brand Impersonation Detected!
-                    </h6>
-                    <p class="mb-1 small" id="res-impersonation-text"></p>
-                    <div class="small fw-semibold text-white">
-                        Official Genuine Website: <span id="res-official-brand-domain" class="text-info text-decoration-underline"></span>
+                    <!-- Security Explanation -->
+                    <div class="p-3 mb-4 rounded bg-dark border border-secondary border-opacity-25">
+                        <h6 class="text-info fw-bold mb-2">
+                            <i class="fa-solid fa-shield-halved me-1"></i> Security Forensic Analysis
+                        </h6>
+                        <p id="res-explanation-text" class="text-white mb-0"></p>
+                    </div>
+
+                    <!-- Brand Impersonation Alert Banner -->
+                    <div id="res-impersonation-alert" class="truth-alert alert-limitations mb-4" style="display: none; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.5); color: #fca5a5;">
+                        <h6 class="fw-bold mb-1 text-danger">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i> Phishing Alert: Brand Impersonation Detected!
+                        </h6>
+                        <p class="mb-1 small" id="res-impersonation-text"></p>
+                        <div class="small fw-semibold text-white">
+                            Official Genuine Website: <span id="res-official-brand-domain" class="text-info text-decoration-underline"></span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- AI Voice Result / Narration Player -->
+                <!-- 3. AI VOICE RESULT & NARRATION -->
                 <div class="voice-result-card p-3 mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div class="d-flex align-items-center gap-3">
                         <button type="button" id="voice-play-btn" class="voice-play-btn" title="Listen to AI Voice Explanation">
@@ -127,10 +196,10 @@
                         </button>
                         <div>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <h6 class="text-white fw-bold mb-0">AI Voice Result & Explanation</h6>
+                                <h6 class="text-white fw-bold mb-0">AI Voice Result Explanation</h6>
                                 <span id="voice-status-badge" class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25 small">Ready to Speak</span>
                             </div>
-                            <small class="text-secondary" id="voice-caption">Click to hear AI voice explain if this link is safe, fake, or fraud.</small>
+                            <small class="text-secondary" id="voice-caption">Click to hear AI voice explain if this link and content are authentic or fake.</small>
                         </div>
                     </div>
                     <div class="d-flex align-items-center flex-wrap gap-2">
@@ -159,18 +228,15 @@
                 </div>
 
                 <!-- Threat Indicators vs Security Markers -->
-                <div class="row g-4 mb-4">
-                    <!-- Threat / Red Flags -->
+                <div id="security-details-section" class="row g-4 mb-4">
                     <div class="col-md-6">
                         <div class="h-100 p-3 rounded bg-dark bg-opacity-50 border border-danger border-opacity-25">
                             <h6 class="text-danger fw-bold mb-3 d-flex align-items-center gap-2">
-                                <i class="fa-solid fa-triangle-exclamation"></i> Threat Indicators & Red Flags
+                                <i class="fa-solid fa-triangle-exclamation"></i> Threat Indicators & Risk Flags
                             </h6>
                             <div id="res-threat-list"></div>
                         </div>
                     </div>
-
-                    <!-- Positive / Security Checks -->
                     <div class="col-md-6">
                         <div class="h-100 p-3 rounded bg-dark bg-opacity-50 border border-success border-opacity-25">
                             <h6 class="text-success fw-bold mb-3 d-flex align-items-center gap-2">
@@ -184,14 +250,14 @@
                 <!-- Actionable Safety Guidance -->
                 <div class="p-3 mb-4 rounded bg-dark bg-opacity-75 border border-info border-opacity-25">
                     <h6 class="text-info fw-bold mb-2">
-                        <i class="fa-solid fa-user-shield me-1"></i> Actionable Safety Recommendation (Kya Karein?)
+                        <i class="fa-solid fa-user-shield me-1"></i> Actionable Recommendation (Kya Karein?)
                     </h6>
                     <p id="res-recommendation-text" class="text-white mb-0"></p>
                 </div>
 
                 <!-- Technical Audit Metadata -->
-                <div class="truth-card p-3 mb-4 bg-dark bg-opacity-50 border-secondary border-opacity-25">
-                    <h6 class="text-secondary small fw-bold text-uppercase mb-3">Technical Domain Telemetry</h6>
+                <div id="telemetry-section" class="truth-card p-3 mb-4 bg-dark bg-opacity-50 border-secondary border-opacity-25">
+                    <h6 class="text-secondary small fw-bold text-uppercase mb-3">Domain & Network Telemetry</h6>
                     <div class="row g-3 text-center">
                         <div class="col-4 col-md-2">
                             <small class="text-secondary d-block">Host Protocol</small>
@@ -219,7 +285,7 @@
                 <!-- Action Toolbar -->
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top border-secondary border-opacity-25">
                     <a id="res-full-report-link" href="#" class="btn btn-truth-outline btn-sm">
-                        <i class="fa-solid fa-file-lines me-1"></i> View Full Printable Report
+                        <i class="fa-solid fa-file-lines me-1"></i> View Full Audit Report
                     </a>
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-truth-outline btn-sm" onclick="copyShareLink()">
@@ -231,19 +297,22 @@
 
             <!-- Quick Test Scenarios For Demonstration -->
             <div class="truth-card p-4">
-                <h6 class="text-white mb-2"><i class="fa-solid fa-lightbulb text-warning me-1"></i> Quick Test Scenarios For Demonstration</h6>
+                <h6 class="text-white mb-3"><i class="fa-solid fa-lightbulb text-warning me-1"></i> Quick Test Scenarios (Click to try)</h6>
                 <div class="d-flex flex-wrap gap-2">
-                    <button type="button" class="btn btn-sm btn-dark border border-danger border-opacity-50 text-danger" onclick="document.getElementById('url-input').value='http://sbi-kyc-verify-update.xyz/login';">
-                        <i class="fa-solid fa-triangle-exclamation me-1"></i> Fake SBI KYC Scam (Fraud)
+                    <button type="button" class="btn btn-sm btn-dark border border-success border-opacity-50 text-success" onclick="selectQuickTest('https://www.ndtv.com/india-news/isro-chandrayaan-3-landing-success-moon', 'content');">
+                        <i class="fa-regular fa-newspaper me-1"></i> Verified News (The Hindu / NDTV)
                     </button>
-                    <button type="button" class="btn btn-sm btn-dark border border-danger border-opacity-50 text-danger" onclick="document.getElementById('url-input').value='https://free-iphone-winner-claim.top/bonus';">
-                        <i class="fa-solid fa-gift me-1"></i> Fake Free iPhone Giveaway (Fraud)
+                    <button type="button" class="btn btn-sm btn-dark border border-info border-opacity-50 text-info" onclick="selectQuickTest('https://www.youtube.com/watch?v=21X5lGlDOfg', 'content');">
+                        <i class="fa-brands fa-youtube me-1"></i> YouTube NASA Video
                     </button>
-                    <button type="button" class="btn btn-sm btn-dark border border-success border-opacity-50 text-success" onclick="document.getElementById('url-input').value='https://www.onlinesbi.sbi';">
-                        <i class="fa-solid fa-circle-check me-1"></i> Official SBI Internet Banking (Certified)
+                    <button type="button" class="btn btn-sm btn-dark border border-danger border-opacity-50 text-danger" onclick="selectQuickTest('https://www.theonion.com/nasa-discovers-moon-is-made-of-cheese', 'content');">
+                        <i class="fa-solid fa-masks-theater me-1"></i> Fake News / Satire (The Onion)
                     </button>
-                    <button type="button" class="btn btn-sm btn-dark border border-success border-opacity-50 text-success" onclick="document.getElementById('url-input').value='https://www.amazon.in/gp/goldbox';">
-                        <i class="fa-solid fa-circle-check me-1"></i> Legitimate Amazon India (Certified)
+                    <button type="button" class="btn btn-sm btn-dark border border-danger border-opacity-50 text-danger" onclick="selectQuickTest('http://sbi-kyc-verify-update.xyz/login', 'security');">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i> Fake SBI Phishing Scam
+                    </button>
+                    <button type="button" class="btn btn-sm btn-dark border border-success border-opacity-50 text-success" onclick="selectQuickTest('https://www.onlinesbi.sbi', 'security');">
+                        <i class="fa-solid fa-circle-check me-1"></i> Certified Official SBI Banking
                     </button>
                 </div>
             </div>

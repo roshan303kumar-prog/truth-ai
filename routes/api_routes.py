@@ -11,6 +11,7 @@ from services.image_verifier import ImageVerifier
 from services.video_verifier import VideoVerifier
 from services.link_verifier import LinkVerifier
 from services.ai_assistant import AIAssistant
+from services.content_verifier import ContentLinkVerifier
 from utils.security import (
     sanitize_input_text,
     validate_image_file,
@@ -36,27 +37,49 @@ def verify_news():
     if not claim or len(claim) < 5:
         return jsonify({"success": False, "error": "Please provide a valid claim or news headline (min 5 characters)."}), 400
 
-    verifier = NewsVerifier(current_app.config)
-    result = verifier.verify_claim(claim)
+    content_verifier = ContentLinkVerifier(current_app.config)
+    is_url_input = content_verifier.is_url(claim)
+
+    if is_url_input:
+        # User pasted a News or Video Link into the claim verifier
+        result = content_verifier.verify_content_link(claim)
+        claim_title = result.get("title", claim)
+        v_type = "video_link" if result.get("is_video") else "news_link"
+        conf_score = float(result.get("authenticity_score", 50.0))
+        verdict = result.get("verdict", "Unverified")
+    else:
+        verifier = NewsVerifier(current_app.config)
+        result = verifier.verify_claim(claim)
+        claim_title = claim
+        v_type = "news"
+        conf_score = result["confidence_score"]
+        verdict = result["verdict"]
 
     # Persist report in database
     report = VerificationReport(
         user_id=current_user.id if current_user.is_authenticated else None,
-        verification_type="news",
-        title_or_claim=claim[:450],
+        verification_type=v_type,
+        title_or_claim=claim_title[:450],
         submitted_content=claim,
-        verdict=result["verdict"],
-        confidence_score=result["confidence_score"],
+        verdict=verdict,
+        confidence_score=conf_score,
         explanation=result["explanation"],
     )
     report.supporting_evidence = result["supporting_evidence"]
     report.contradicting_evidence = result["contradicting_evidence"]
     report.source_links = result["source_links"]
-    report.limitations = result["limitations"]
+    report.limitations = result.get("limitations", [
+        "Online claim and media forensics inspect verifiable sources and cross-corroboration.",
+        "Breaking real-time events may experience delayed official confirmation."
+    ])
     report.technical_findings = {
-        "linguistic_analysis": result.get("linguistic_analysis", {}),
-        "total_sources_evaluated": result.get("total_sources_evaluated", 0),
+        "linguistic_analysis": result.get("linguistic_analysis", result.get("linguistics", {})),
+        "total_sources_evaluated": result.get("total_sources_evaluated", 1),
         "context_evidence": result.get("context_evidence", []),
+        "is_url_input": is_url_input,
+        "content_type": result.get("content_type"),
+        "publisher": result.get("publisher"),
+        "key_findings": result.get("key_findings", []),
     }
 
     db.session.add(report)
@@ -108,6 +131,57 @@ def verify_link():
         "official_brand_domain": result.get("official_brand_domain"),
         "is_certified": result.get("is_certified", False),
         "certified_organization": result.get("certified_organization"),
+    }
+
+    db.session.add(report)
+    db.session.commit()
+
+    res_payload = result.copy()
+    res_payload["report_id"] = report.id
+    res_payload["success"] = True
+    return jsonify(res_payload), 200
+
+
+@api_bp.route("/verify-content-link", methods=["POST"])
+def verify_content_link():
+    if not check_rate_limit():
+        return jsonify({"success": False, "error": "Rate limit exceeded. Please wait a moment."}), 429
+
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    url = sanitize_input_text(data.get("url", ""))
+
+    if not url or len(url) < 3:
+        return jsonify({"success": False, "error": "Please provide a valid News or Video URL."}), 400
+
+    verifier = ContentLinkVerifier(current_app.config)
+    result = verifier.verify_content_link(url)
+
+    # Persist report in database
+    report = VerificationReport(
+        user_id=current_user.id if current_user.is_authenticated else None,
+        verification_type="video_link" if result.get("is_video") else "news_link",
+        title_or_claim=f"{result.get('content_type', 'Link')}: {result.get('title', '')}"[:450],
+        submitted_content=url,
+        verdict=result["verdict"],
+        confidence_score=float(result.get("authenticity_score", 50.0)),
+        explanation=result["explanation"],
+    )
+    report.supporting_evidence = result.get("supporting_evidence", [])
+    report.contradicting_evidence = result.get("contradicting_evidence", [])
+    report.source_links = result.get("source_links", [])
+    report.limitations = [
+        "Online link verification inspects live article headlines, video descriptions, and publisher domain trust.",
+        "Breaking stories published within the last hour may have limited peer-corroboration."
+    ]
+    report.technical_findings = {
+        "content_type": result.get("content_type"),
+        "is_video": result.get("is_video"),
+        "publisher": result.get("publisher"),
+        "source_trust_score": result.get("source_trust_score"),
+        "source_badge": result.get("source_badge"),
+        "authenticity_score": result.get("authenticity_score"),
+        "key_findings": result.get("key_findings", []),
+        "linguistics": result.get("linguistics", {}),
     }
 
     db.session.add(report)
