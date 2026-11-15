@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Contact & Research Inquiries — TRUTH AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="text-center mb-4">
+                <span class="hero-pill mb-2"><i class="fa-regular fa-envelope"></i> Research & Support</span>
+                <h1 class="fw-bold mb-2">Get in Touch</h1>
+                <p class="text-secondary small">
+                    Have inquiries regarding verification accuracy, academic collaboration, or suggestions?
+                    Our development team welcomes your feedback.
+                </p>
+            </div>
+
+            <div class="truth-card p-4 p-md-5 shadow-lg">
+                <form action="{{ url_for('views.contact') }}" method="POST">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label text-white small fw-semibold">Your Name <span class="text-danger">*</span></label>
+                            <input type="text" id="name" name="name" class="truth-input" placeholder="e.g. Alex Smith" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label text-white small fw-semibold">Your Email <span class="text-danger">*</span></label>
+                            <input type="email" id="email" name="email" class="truth-input" placeholder="alex@example.com" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="subject" class="form-label text-white small fw-semibold">Subject</label>
+                        <input type="text" id="subject" name="subject" class="truth-input" placeholder="e.g. Academic Inquiry / Bug Report">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="message" class="form-label text-white small fw-semibold">Message <span class="text-danger">*</span></label>
+                        <textarea id="message" name="message" class="truth-textarea" rows="5" placeholder="Write your message or inquiry here..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-truth-primary w-100 py-2">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Send Feedback
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

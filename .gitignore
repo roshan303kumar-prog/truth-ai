@@ -1,0 +1,32 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python Cache & Testing
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Local Environment Variables & Secrets
+.env
+
+# Runtime Uploads (Folders preserved with .gitkeep)
+uploads/images/*
+uploads/videos/*
+uploads/ela/*
+uploads/videos/frames/*
+!uploads/images/.gitkeep
+!uploads/videos/.gitkeep
+!uploads/ela/.gitkeep
+!uploads/videos/frames/.gitkeep
+
+# Local SQLite runtime database
+database/truth_ai.db
+
+# IDE Files
+.vscode/
+.idea/
+Thumbs.db

@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}News & Claim Verification — TRUTH AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <span class="hero-pill mb-2"><i class="fa-regular fa-newspaper"></i> Multi-Source Natural Language Verification</span>
+                <h1 class="fw-bold mb-2">Verify News & Factual Claims</h1>
+                <p class="text-secondary">
+                    Submit headlines, statements, or viral text. The system interrogates independent fact-checking repositories,
+                    cross-references evidence stances, and constructs an explainable audit report.
+                </p>
+            </div>
+
+            <!-- Input Card -->
+            <div class="truth-card mb-4 shadow-lg">
+                <form id="news-verify-form">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label for="claim-input" class="form-label text-white fw-semibold mb-0">
+                                Claim or News Article Text <span class="text-danger">*</span>
+                            </label>
+                            <button type="button" id="voice-input-btn" class="btn btn-outline-info btn-sm rounded-pill px-3 py-1 voice-input-btn" title="Speak instead of typing">
+                                <i class="fa-solid fa-microphone me-1"></i> <span id="voice-input-label">Speak your news</span>
+                            </button>
+                        </div>
+                        <div id="voice-listening-status" class="small text-info mb-2" style="display: none;">
+                            <i class="fa-solid fa-circle-dot fa-fade text-danger me-1"></i> <span id="voice-listening-text">Listening to microphone... Speak clearly into your mic.</span>
+                        </div>
+                        <textarea id="claim-input" class="truth-textarea" rows="4" placeholder="Enter headline or statement (e.g. 'NASA Perseverance rover landed on Mars in February 2021' or click 'Speak your news')..." required></textarea>
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="text-secondary small">
+                            <i class="fa-solid fa-shield-halved text-info me-1"></i> Evaluated across Google Fact Check, DuckDuckGo & Wikipedia
+                        </div>
+                        <button type="submit" id="news-submit-btn" class="btn btn-truth-primary px-4 py-2">
+                            <i class="fa-solid fa-magnifying-glass me-2"></i> Verify News
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Analysis Progress Overlay -->
+            <div id="analysis-progress" class="truth-card analysis-progress-overlay mb-4">
+                <div class="analysis-spinner"></div>
+                <h4 class="text-white fw-bold mb-2">Analyzing Claim In Real-Time</h4>
+                <p class="text-secondary small">Interrogating global databases & computing evidence stance cross-references...</p>
+                
+                <ul class="progress-steps-list">
+                    <li class="progress-step-item active" id="step-1">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Tokenizing claim & extracting named entities
+                    </li>
+                    <li class="progress-step-item" id="step-2">
+                        <i class="fa-solid fa-circle-notch"></i> Searching fact-check repositories & digital archives
+                    </li>
+                    <li class="progress-step-item" id="step-3">
+                        <i class="fa-solid fa-circle-notch"></i> Computing semantic stance (supporting vs. contradicting)
+                    </li>
+                    <li class="progress-step-item" id="step-4">
+                        <i class="fa-solid fa-circle-notch"></i> Formulating explainable synthesis & confidence level
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Dynamic Result Card -->
+            <div id="news-result-container" class="truth-card mb-4" style="display: none;">
+                <!-- Header / Verdict Bar -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25 gap-3">
+                    <div>
+                        <span class="text-secondary small text-uppercase d-block mb-1">Verification Assessment</span>
+                        <div id="res-verdict-badge" class="verdict-badge">
+                            <i id="res-verdict-icon" class="fa-solid fa-circle-info"></i>
+                            <span id="res-verdict-text">Processing...</span>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="text-secondary small d-block">Confidence Level</span>
+                        <span id="res-confidence-score" class="fs-4 fw-bold text-white">0%</span>
+                    </div>
+                </div>
+
+                <!-- Confidence Meter Bar -->
+                <div class="confidence-meter-container mb-4">
+                    <div id="res-confidence-bar" class="confidence-meter-bar" style="width: 0%;"></div>
+                </div>
+
+                <!-- Transparent Explanation -->
+                <div class="p-3 mb-4 rounded bg-dark border border-secondary border-opacity-25">
+                    <h6 class="text-info fw-bold mb-2">
+                        <i class="fa-solid fa-brain me-1"></i> Evidence-Based Explanation
+                    </h6>
+                    <p id="res-explanation-text" class="text-white mb-0"></p>
+                </div>
+
+                <!-- AI Voice Result / Narration Player (Feature 2) -->
+                <div class="voice-result-card p-3 mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <button type="button" id="voice-play-btn" class="voice-play-btn" title="Listen to AI Voice Explanation">
+                            <i id="voice-play-icon" class="fa-solid fa-volume-high"></i>
+                        </button>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h6 class="text-white fw-bold mb-0">AI Voice Result & Explanation</h6>
+                                <span id="voice-status-badge" class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25 small">Ready to Speak</span>
+                            </div>
+                            <small class="text-secondary" id="voice-caption">Click to hear AI explain the verdict, evidence sources, and confidence level.</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <!-- Voice Gender Selector (Female / Male) -->
+                        <div class="voice-gender-toggle d-flex align-items-center gap-1 p-1 rounded">
+                            <button type="button" id="voice-gender-female" class="voice-gender-btn active" title="Female AI Voice">
+                                <i class="fa-solid fa-venus me-1 text-danger"></i> Female
+                            </button>
+                            <button type="button" id="voice-gender-male" class="voice-gender-btn" title="Male AI Voice">
+                                <i class="fa-solid fa-mars me-1 text-info"></i> Male
+                            </button>
+                        </div>
+
+                        <!-- Animated Audio Wave -->
+                        <div id="voice-audio-wave" class="audio-wave-bars" style="display: none;">
+                            <span class="wave-bar"></span>
+                            <span class="wave-bar"></span>
+                            <span class="wave-bar"></span>
+                            <span class="wave-bar"></span>
+                            <span class="wave-bar"></span>
+                        </div>
+                        <button type="button" id="voice-stop-btn" class="btn btn-sm btn-outline-danger" style="display: none;">
+                            <i class="fa-solid fa-stop me-1"></i> Stop
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Evidence Comparison Grid -->
+                <div class="row g-4 mb-4">
+                    <!-- Supporting Evidence -->
+                    <div class="col-md-6">
+                        <div class="h-100 p-3 rounded bg-dark bg-opacity-50 border border-success border-opacity-25">
+                            <h6 class="text-success fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-circle-check"></i> Supporting Evidence
+                            </h6>
+                            <div id="res-supporting-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Contradicting Evidence -->
+                    <div class="col-md-6">
+                        <div class="h-100 p-3 rounded bg-dark bg-opacity-50 border border-danger border-opacity-25">
+                            <h6 class="text-danger fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-circle-xmark"></i> Contradicting Evidence
+                            </h6>
+                            <div id="res-contradicting-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Direct Source Links -->
+                <div class="mb-4">
+                    <h6 class="text-white fw-bold mb-2">
+                        <i class="fa-solid fa-link text-info me-1"></i> Direct Source Citations & References
+                    </h6>
+                    <ul id="res-sources-list" class="list-unstyled mb-0"></ul>
+                </div>
+
+                <!-- Limitations Notice -->
+                <div class="truth-alert alert-limitations mb-4">
+                    <h6 class="fw-bold mb-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> Technical Limitations & Uncertainty</h6>
+                    <ul id="res-limitations-list" class="mb-0 small ps-3"></ul>
+                </div>
+
+                <!-- Action Toolbar -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top border-secondary border-opacity-25">
+                    <a id="res-full-report-link" href="#" class="btn btn-truth-outline btn-sm">
+                        <i class="fa-solid fa-file-lines me-1"></i> View Full Printable Report
+                    </a>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-truth-outline btn-sm" onclick="copyShareLink()">
+                            <i class="fa-solid fa-share-nodes me-1"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo Tips / Quick Test Claims -->
+            <div class="truth-card p-4">
+                <h6 class="text-white mb-2"><i class="fa-solid fa-lightbulb text-warning me-1"></i> Quick Test Scenarios For Demonstration</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-sm btn-dark border border-secondary border-opacity-50 text-secondary" onclick="document.getElementById('claim-input').value='NASA Perseverance rover landed on Mars in February 2021';">
+                        Perseverance Mars Rover (Supported)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-dark border border-secondary border-opacity-50 text-secondary" onclick="document.getElementById('claim-input').value='NASA James Webb Space Telescope discovered ancient distant galaxies';">
+                        James Webb Galaxies (Supported)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-dark border border-secondary border-opacity-50 text-secondary" onclick="document.getElementById('claim-input').value='COVID-19 vaccines contain secret 5G microchips for citizen tracking';">
+                        Vaccine Microchip Myth (Refuted)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-dark border border-secondary border-opacity-50 text-secondary" onclick="document.getElementById('claim-input').value='The Apollo 11 moon landing was staged on a film set directed by Stanley Kubrick';">
+                        Moon Landing Staged (Refuted)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/news.js') }}"></script>
+{% endblock %}

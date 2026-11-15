@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account — TRUTH AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="truth-card shadow-lg p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <i class="fa-solid fa-user-plus text-info fs-1 mb-2"></i>
+                    <h2 class="fw-bold mb-1">Join TRUTH AI</h2>
+                    <p class="text-secondary small">Maintain custom audit logs, save reports, and track disinformation</p>
+                </div>
+
+                <form action="{{ url_for('auth.register') }}" method="POST">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="username" class="form-label text-white small fw-semibold">Username <span class="text-danger">*</span></label>
+                            <input type="text" id="username" name="username" class="truth-input" placeholder="e.g. j_doe" value="{{ username or '' }}" required autofocus>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="full_name" class="form-label text-white small fw-semibold">Full Name</label>
+                            <input type="text" id="full_name" name="full_name" class="truth-input" placeholder="e.g. Jane Doe" value="{{ full_name or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label text-white small fw-semibold">Email Address <span class="text-danger">*</span></label>
+                        <input type="email" id="email" name="email" class="truth-input" placeholder="you@university.edu" value="{{ email or '' }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reg-password" class="form-label text-white small fw-semibold">Password <span class="text-danger">*</span></label>
+                        <input type="password" id="reg-password" name="password" class="truth-input" placeholder="Minimum 8 characters" minlength="8" required>
+                        <div class="progress mt-2" style="height: 4px; background: rgba(255,255,255,0.1);">
+                            <div id="password-strength-bar" class="progress-bar bg-danger" style="width: 0%;"></div>
+                        </div>
+                        <small id="password-hint" class="text-secondary" style="font-size: 0.75rem;">Password must be at least 8 characters</small>
+                    </div>
+
+                    <div class="form-check mb-4 small">
+                        <input class="form-check-input bg-dark border-secondary" type="checkbox" id="terms" required checked>
+                        <label class="form-check-label text-secondary" for="terms">
+                            I understand that automated AI verifiers assist human analysis and require independent multi-source verification.
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-truth-primary w-100 py-2 mb-3">
+                        <i class="fa-solid fa-user-check me-1"></i> Create Free Account
+                    </button>
+                </form>
+
+                <div class="text-center small text-secondary">
+                    Already registered? <a href="{{ url_for('auth.login') }}" class="text-info fw-semibold">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('reg-password').addEventListener('input', function(e) {
+    const val = e.target.value;
+    const bar = document.getElementById('password-strength-bar');
+    const hint = document.getElementById('password-hint');
+    
+    let score = 0;
+    if (val.length >= 8) score += 30;
+    if (/[A-Z]/.test(val)) score += 20;
+    if (/[0-9]/.test(val)) score += 25;
+    if (/[^A-Za-z0-9]/.test(val)) score += 25;
+    
+    bar.style.width = score + '%';
+    if (score < 40) {
+        bar.className = 'progress-bar bg-danger';
+        hint.textContent = 'Weak password';
+    } else if (score < 75) {
+        bar.className = 'progress-bar bg-warning';
+        hint.textContent = 'Moderate password strength';
+    } else {
+        bar.className = 'progress-bar bg-success';
+        hint.textContent = 'Strong password';
+    }
+});
+</script>
+{% endblock %}

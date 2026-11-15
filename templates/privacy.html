@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy & Ethical Standards — TRUTH AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="text-center mb-5">
+                <span class="hero-pill mb-2"><i class="fa-solid fa-lock"></i> User Rights & Epistemic Ethics</span>
+                <h1 class="fw-bold mb-3">Privacy & Verification Ethics Policy</h1>
+                <p class="hero-lead">
+                    TRUTH AI is founded on the philosophy that information verification must respect user privacy,
+                    maintain data sovereignty, and remain ethically transparent.
+                </p>
+            </div>
+
+            <div class="truth-card p-4 p-md-5 shadow-lg">
+                <h4 class="text-white fw-bold mb-3">1. Information Handling & Data Retention</h4>
+                <p class="text-secondary" style="line-height: 1.8;">
+                    When you submit text claims, photographs, or video files for verification:
+                </p>
+                <ul class="text-secondary mb-4 ps-3" style="line-height: 1.8;">
+                    <li><strong>Uploaded Files:</strong> Images and videos uploaded are processed solely to compute forensic metrics (such as EXIF extraction, ELA heatmaps, and keyframe sampling). They are strictly bound to your report and never distributed to third-party advertising networks.</li>
+                    <li><strong>Search Queries:</strong> Text claims are sent to public search endpoints (such as Google Fact Check Tools API and DuckDuckGo) without attaching personal identifying account credentials.</li>
+                    <li><strong>Account Sovereignty:</strong> Registered users can permanently delete any verification report and its associated uploaded files directly from their history page at any time.</li>
+                </ul>
+
+                <h4 class="text-white fw-bold mb-3">2. Ethical AI Guarantees</h4>
+                <p class="text-secondary" style="line-height: 1.8;">
+                    In accordance with ethical machine learning and disinformation research guidelines:
+                </p>
+                <ul class="text-secondary mb-4 ps-3" style="line-height: 1.8;">
+                    <li><strong>Never Inventing Evidence:</strong> The system will never fabricate a quotation, forge an institutional citation, or claim corroboration when none exists.</li>
+                    <li><strong>Absence of Evidence is Not Evidence of Absence:</strong> Missing search results will never result in a claim being labeled as "fake" or "conspiracy." The system explicitly classifies such instances as <em>Insufficient Evidence</em>.</li>
+                    <li><strong>Distinguishing Observation from Verdict:</strong> Technical anomalies (e.g. absent EXIF tags or high JPEG compression variance) are clearly distinguished from definitive judgments of deception.</li>
+                </ul>
+
+                <h4 class="text-white fw-bold mb-3">3. Security Practices</h4>
+                <p class="text-secondary" style="line-height: 1.8;">
+                    All user passwords are encrypted using modern salted scrypt/PBKDF2 hashing via Werkzeug.
+                    Uploaded media files undergo strict magic-byte validation and filename sanitization to eliminate directory traversal risks and prevent executable code delivery.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

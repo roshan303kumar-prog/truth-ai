@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Link & URL Phishing Scanner — TRUTH AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <span class="hero-pill mb-2"><i class="fa-solid fa-shield-virus text-info"></i> Phishing & URL Forensics Engine</span>
+                <h1 class="fw-bold mb-2">Detect Fake, Fraud & Suspicious Links</h1>
+                <p class="text-secondary">
+                    Analyze links received on WhatsApp, SMS, or Email before clicking.
+                    Inspect domain spoofing, fake banking portals, abusive TLDs, and certified safe institutions.
+                </p>
+            </div>
+
+            <!-- Input Card -->
+            <div class="truth-card mb-4 shadow-lg">
+                <form id="link-verify-form">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label for="url-input" class="form-label text-white fw-semibold mb-0">
+                                Enter Web Link or URL <span class="text-danger">*</span>
+                            </label>
+                            <div class="d-flex gap-2">
+                                <button type="button" id="paste-btn" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1" title="Paste from clipboard">
+                                    <i class="fa-regular fa-clipboard me-1"></i> Paste
+                                </button>
+                                <button type="button" id="voice-input-btn" class="btn btn-outline-info btn-sm rounded-pill px-3 py-1 voice-input-btn" title="Speak instead of typing">
+                                    <i class="fa-solid fa-microphone me-1"></i> <span id="voice-input-label">Voice Input</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="voice-listening-status" class="small text-info mb-2" style="display: none;">
+                            <i class="fa-solid fa-circle-dot fa-fade text-danger me-1"></i> <span id="voice-listening-text">Listening to microphone... Speak the web address.</span>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary border-opacity-50 text-info">
+                                <i class="fa-solid fa-link"></i>
+                            </span>
+                            <input type="text" id="url-input" class="form-control truth-input" placeholder="e.g. http://sbi-kyc-verify-update.xyz or https://www.amazon.in" required autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="text-secondary small">
+                            <i class="fa-solid fa-shield-halved text-info me-1"></i> Real-time forensic scan: Typosquatting, TLD abuse & certified domain whitelist
+                        </div>
+                        <button type="submit" id="link-submit-btn" class="btn btn-truth-primary px-4 py-2">
+                            <i class="fa-solid fa-shield-heart me-2"></i> Scan Link Now
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Analysis Progress Overlay -->
+            <div id="analysis-progress" class="truth-card analysis-progress-overlay mb-4">
+                <div class="analysis-spinner"></div>
+                <h4 class="text-white fw-bold mb-2">Forensic Link Audit in Progress</h4>
+                <p class="text-secondary small">Extracting URL architecture, verifying institutional whitelist & scanning threat markers...</p>
+
+                <ul class="progress-steps-list">
+                    <li class="progress-step-item active" id="step-1">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Parsing URL syntax, scheme & host structure
+                    </li>
+                    <li class="progress-step-item" id="step-2">
+                        <i class="fa-solid fa-circle-notch"></i> Cross-referencing certified institutional domain whitelist
+                    </li>
+                    <li class="progress-step-item" id="step-3">
+                        <i class="fa-solid fa-circle-notch"></i> Scanning brand impersonation, high-risk TLDs & urgency traps
+                    </li>
+                    <li class="progress-step-item" id="step-4">
+                        <i class="fa-solid fa-circle-notch"></i> Calculating risk score & formulating actionable safety guidance
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Dynamic Result Card -->
+            <div id="link-result-container" class="truth-card mb-4" style="display: none;">
+                <!-- Header / Verdict Bar -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25 gap-3">
+                    <div>
+                        <span class="text-secondary small text-uppercase d-block mb-1">Link Security Assessment</span>
+                        <div id="res-verdict-badge" class="verdict-badge">
+                            <i id="res-verdict-icon" class="fa-solid fa-circle-info"></i>
+                            <span id="res-verdict-text">Processing...</span>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="text-secondary small d-block">Threat Risk Score</span>
+                        <span id="res-risk-score" class="fs-4 fw-bold text-white">0%</span>
+                        <small id="res-risk-label" class="d-block small text-secondary">Low Risk</small>
+                    </div>
+                </div>
+
+                <!-- Risk Meter Bar -->
+                <div class="confidence-meter-container mb-4">
+                    <div id="res-risk-bar" class="confidence-meter-bar" style="width: 0%;"></div>
+                </div>
+
+                <!-- Transparent Explanation -->
+                <div class="p-3 mb-4 rounded bg-dark border border-secondary border-opacity-25">
+                    <h6 class="text-info fw-bold mb-2">
+                        <i class="fa-solid fa-brain me-1"></i> Security Forensic Analysis
+                    </h6>
+                    <p id="res-explanation-text" class="text-white mb-0"></p>
+                </div>
+
+                <!-- Brand Impersonation Alert Banner (Conditional) -->
+                <div id="res-impersonation-alert" class="truth-alert alert-limitations mb-4" style="display: none; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.5); color: #fca5a5;">
+                    <h6 class="fw-bold mb-1 text-danger">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i> Phishing Alert: Brand Impersonation Detected!
+                    </h6>
+                    <p class="mb-1 small" id="res-impersonation-text"></p>
+                    <div class="small fw-semibold text-white">
+                        Official Genuine Website: <span id="res-official-brand-domain" class="text-info text-decoration-underline"></span>
+                    </div>
+                </div>
+
+                <!-- AI Voice Result / Narration Player -->
+                <div class="voice-result-card p-3 mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <button type="button" id="voice-play-btn" class="voice-play-btn" title="Listen to AI Voice Explanation">
+                            <i id="voice-play-icon" class="fa-solid fa-volume-high"></i>
+                        </button>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h6 class="text-white fw-bold mb-0">AI Voice Result & Explanation</h6>
+                                <span id="voice-status-badge" class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25 small">Ready to Speak</span>
+                            </div>
+                            <small class="text-secondary" id="voice-caption">Click to hear AI voice explain if this link is safe, fake, or fraud.</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <!-- Voice Gender Selector (Female / Male) -->
+                        <div class="voice-gender-toggle d-flex align-items-center gap-1 p-1 rounded">
+                            <button type="button" id="voice-gender-female" class="voice-gender-btn active" title="Female AI Voice">
+                                <i class="fa-solid fa-venus me-1 text-danger"></i> Female
+                            </button>
+                            <button type="button" id="voice-gender-male" class="voice-gender-btn" title="Male AI Voice">
+                                <i class="fa-solid fa-mars me-1 text-info"></i> Male
+                            </button>
+                        </div>
+
+                        <!-- Animated Audio Wave -->
+                        <div id="voice-audio-wave" class="audio-wave-bars" style="display: none;">
+                            <span class="wave-bar"></span>
+                            <span class="wave-bar"></span>
+                            <span class="wave-bar"></span>
+                            <span class="wave-bar"></span>
+                            <span class="wave-bar"></span>
+                        </div>
+                        <button type="button" id="voice-stop-btn" class="btn btn-sm btn-outline-danger" style="display: none;">
+                            <i class="fa-solid fa-stop me-1"></i> Stop
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Threat Indicators vs Security Markers -->
+                <div class="row g-4 mb-4">
+                    <!-- Threat / Red Flags -->
+                    <div class="col-md-6">
+                        <div class="h-100 p-3 rounded bg-dark bg-opacity-50 border border-danger border-opacity-25">
+                            <h6 class="text-danger fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Threat Indicators & Red Flags
+                            </h6>
+                            <div id="res-threat-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Positive / Security Checks -->
+                    <div class="col-md-6">
+                        <div class="h-100 p-3 rounded bg-dark bg-opacity-50 border border-success border-opacity-25">
+                            <h6 class="text-success fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-shield-halved"></i> Security & Authentication Markers
+                            </h6>
+                            <div id="res-security-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actionable Safety Guidance -->
+                <div class="p-3 mb-4 rounded bg-dark bg-opacity-75 border border-info border-opacity-25">
+                    <h6 class="text-info fw-bold mb-2">
+                        <i class="fa-solid fa-user-shield me-1"></i> Actionable Safety Recommendation (Kya Karein?)
+                    </h6>
+                    <p id="res-recommendation-text" class="text-white mb-0"></p>
+                </div>
+
+                <!-- Technical Audit Metadata -->
+                <div class="truth-card p-3 mb-4 bg-dark bg-opacity-50 border-secondary border-opacity-25">
+                    <h6 class="text-secondary small fw-bold text-uppercase mb-3">Technical Domain Telemetry</h6>
+                    <div class="row g-3 text-center">
+                        <div class="col-4 col-md-2">
+                            <small class="text-secondary d-block">Host Protocol</small>
+                            <span id="audit-protocol" class="fw-bold text-white">HTTPS</span>
+                        </div>
+                        <div class="col-4 col-md-2">
+                            <small class="text-secondary d-block">TLD Category</small>
+                            <span id="audit-tld" class="fw-bold text-white">.COM</span>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <small class="text-secondary d-block">Domain Randomness</small>
+                            <span id="audit-entropy" class="fw-bold text-white">Low</span>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <small class="text-secondary d-block">IP Address Host</small>
+                            <span id="audit-ip" class="fw-bold text-white">No</span>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <small class="text-secondary d-block">Masked Shortener</small>
+                            <span id="audit-shortened" class="fw-bold text-white">No</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Toolbar -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top border-secondary border-opacity-25">
+                    <a id="res-full-report-link" href="#" class="btn btn-truth-outline btn-sm">
+                        <i class="fa-solid fa-file-lines me-1"></i> View Full Printable Report
+                    </a>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-truth-outline btn-sm" onclick="copyShareLink()">
+                            <i class="fa-solid fa-share-nodes me-1"></i> Share Audit
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Test Scenarios For Demonstration -->
+            <div class="truth-card p-4">
+                <h6 class="text-white mb-2"><i class="fa-solid fa-lightbulb text-warning me-1"></i> Quick Test Scenarios For Demonstration</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-sm btn-dark border border-danger border-opacity-50 text-danger" onclick="document.getElementById('url-input').value='http://sbi-kyc-verify-update.xyz/login';">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i> Fake SBI KYC Scam (Fraud)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-dark border border-danger border-opacity-50 text-danger" onclick="document.getElementById('url-input').value='https://free-iphone-winner-claim.top/bonus';">
+                        <i class="fa-solid fa-gift me-1"></i> Fake Free iPhone Giveaway (Fraud)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-dark border border-success border-opacity-50 text-success" onclick="document.getElementById('url-input').value='https://www.onlinesbi.sbi';">
+                        <i class="fa-solid fa-circle-check me-1"></i> Official SBI Internet Banking (Certified)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-dark border border-success border-opacity-50 text-success" onclick="document.getElementById('url-input').value='https://www.amazon.in/gp/goldbox';">
+                        <i class="fa-solid fa-circle-check me-1"></i> Legitimate Amazon India (Certified)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/link.js') }}"></script>
+{% endblock %}

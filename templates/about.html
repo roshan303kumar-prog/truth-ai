@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}About TRUTH AI — Mission & Academic Architecture{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="text-center mb-5">
+                <span class="hero-pill mb-2"><i class="fa-solid fa-graduation-cap"></i> Final Year Capstone Project (Level 4)</span>
+                <h1 class="fw-bold mb-3">About TRUTH AI</h1>
+                <p class="hero-lead">
+                    An advanced multi-modal fake news detection and media forensic platform designed to bridge
+                    algorithmic natural language processing with human critical thinking.
+                </p>
+            </div>
+
+            <div class="truth-card p-4 p-md-5 mb-4 shadow-lg">
+                <h3 class="fw-bold text-white mb-3">Project Genesis & Objective</h3>
+                <p class="text-secondary" style="line-height: 1.8;">
+                    The digital information ecosystem is saturated with synthetic media, manipulated quotes, and viral disinformation.
+                    Conventional fake news classifiers frequently commit two critical flaws: they rely on simplistic, easily fooled keyword lists,
+                    or they act as uninterpretable black boxes that state a claim is "100% fake" without citing supporting or refuting documentation.
+                </p>
+                <p class="text-secondary" style="line-height: 1.8;">
+                    <strong>TRUTH AI</strong> was architected from the ground up to uphold the principle of <em>epistemic honesty</em>.
+                    Finding a matching search result does not prove a claim is authentic; conversely, missing search results do not prove a claim is fabricated.
+                    Instead, TRUTH AI evaluates multiple independent sources, compares supporting and contradicting stances, and transparently articulates
+                    uncertainty and limitations.
+                </p>
+
+                <hr class="border-secondary border-opacity-25 my-4">
+
+                <h4 class="fw-bold text-white mb-3">The 4 Architectural Pillars</h4>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-secondary border-opacity-25 h-100">
+                            <h6 class="text-info fw-bold mb-2"><i class="fa-solid fa-network-wired me-2"></i>Multi-Source Triangulation</h6>
+                            <p class="text-secondary small mb-0">
+                                Connects across Google Fact Check Tools API, DuckDuckGo web search, and Wikipedia reference graphs.
+                                Aggregates and cross-validates claims across independent institutional databases.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-secondary border-opacity-25 h-100">
+                            <h6 class="text-info fw-bold mb-2"><i class="fa-solid fa-microscope me-2"></i>Error Level Analysis (ELA)</h6>
+                            <p class="text-secondary small mb-0">
+                                In photo forensics, computes localized JPEG compression variance across 8x8 pixel blocks.
+                                Digitally altered or spliced elements exhibit distinct error levels compared to surrounding natural content.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-secondary border-opacity-25 h-100">
+                            <h6 class="text-info fw-bold mb-2"><i class="fa-solid fa-film me-2"></i>Temporal Video Continuity</h6>
+                            <p class="text-secondary small mb-0">
+                                Extracts uniform keyframe sequences with OpenCV. Assesses Laplacian focal sharpness variance,
+                                frame-to-frame lighting transitions, and on-screen chyron text through OCR.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-secondary border-opacity-25 h-100">
+                            <h6 class="text-info fw-bold mb-2"><i class="fa-solid fa-brain me-2"></i>Explainable AI (XAI)</h6>
+                            <p class="text-secondary small mb-0">
+                                Generates clear, plain-language explanations explaining precisely why a conclusion was reached,
+                                citing specific sources, dates, and discrepancies without hallucinating unobserved facts.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-secondary border-opacity-25 my-4">
+
+                <h4 class="fw-bold text-white mb-3">Software Architecture Stack</h4>
+                <div class="table-responsive">
+                    <table class="table table-dark table-sm table-borderless text-secondary">
+                        <tbody>
+                            <tr><td><strong>Backend Framework:</strong></td><td>Python 3.12, Flask, Flask-SQLAlchemy, Flask-Login, Werkzeug</td></tr>
+                            <tr><td><strong>Database Architecture:</strong></td><td>SQLite with SQLAlchemy ORM (User Accounts, Verification Logs, Settings)</td></tr>
+                            <tr><td><strong>Forensics & Computer Vision:</strong></td><td>Pillow (PIL), OpenCV (cv2), Error Level Analysis (ELA), OCR Integrations</td></tr>
+                            <tr><td><strong>Frontend Interface:</strong></td><td>HTML5, CSS3, JavaScript (ES6+), Bootstrap 5, Chart.js, Font Awesome 6</td></tr>
+                            <tr><td><strong>Search & Fact APIs:</strong></td><td>Google Fact Check Tools, DuckDuckGo Live Search, Wikipedia, NewsAPI</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

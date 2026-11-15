@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found (404) — TRUTH AI{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+    <div class="truth-card p-5 max-w-600 mx-auto">
+        <h1 class="display-1 fw-bold text-info mb-2">404</h1>
+        <h3 class="text-white fw-bold mb-3">Resource Not Found</h3>
+        <p class="text-secondary mb-4">
+            The verification report, media file, or page you requested does not exist or has been removed.
+        </p>
+        <a href="{{ url_for('views.index') }}" class="btn btn-truth-primary">
+            <i class="fa-solid fa-house me-1"></i> Return to Homepage
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TRUTH AI — Verify. Analyze. Trust.{% endblock %}</title>
+    <meta name="description" content="AI-Powered Fake News, Image & Video Verification Engine. Independent evidence retrieval, multi-source triangulation, and forensic analysis.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/assistant.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-truth">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('views.index') }}">
+                <i class="fa-solid fa-shield-halved brand-icon"></i>
+                <span>TRUTH<span class="text-info">.AI</span></span>
+            </a>
+            <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTruthNav" aria-controls="navbarTruthNav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTruthNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/news' %}active{% endif %}" href="{{ url_for('views.news') }}">
+                            <i class="fa-regular fa-newspaper me-1"></i> News & Claims
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/image' %}active{% endif %}" href="{{ url_for('views.image') }}">
+                            <i class="fa-regular fa-image me-1"></i> Image Forensics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/video' %}active{% endif %}" href="{{ url_for('views.video') }}">
+                            <i class="fa-solid fa-film me-1"></i> Video Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/link' %}active{% endif %}" href="{{ url_for('views.link') }}">
+                            <i class="fa-solid fa-link me-1"></i> Link Scanner
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/reviews' %}active{% endif %}" href="{{ url_for('views.reviews') }}">
+                            <i class="fa-solid fa-star me-1 text-warning"></i> Reviews
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/history' %}active{% endif %}" href="{{ url_for('views.history') }}">
+                            <i class="fa-solid fa-clock-rotate-left me-1"></i> History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/how-it-works' %}active{% endif %}" href="{{ url_for('views.how_it_works') }}">
+                            <i class="fa-solid fa-diagram-project me-1"></i> How It Works
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/about' %}active{% endif %}" href="{{ url_for('views.about') }}">
+                            <i class="fa-solid fa-circle-info me-1"></i> About
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2">
+                    {% if current_user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-truth-outline dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-regular fa-circle-user text-info me-1"></i> {{ current_user.full_name or current_user.username }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                                <li><a class="dropdown-item" href="{{ url_for('views.dashboard') }}"><i class="fa-solid fa-chart-line me-2 text-info"></i> Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('views.history') }}"><i class="fa-solid fa-bookmark me-2 text-warning"></i> My Verifications</a></li>
+                                <li><hr class="dropdown-divider bg-secondary"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Log Out</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-truth-outline btn-sm">
+                            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Sign In
+                        </a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-truth-primary btn-sm">
+                            <i class="fa-solid fa-user-plus me-1"></i> Register
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages Container -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show truth-alert" role="alert">
+                        <i class="fa-solid fa-circle-exclamation me-2"></i> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Block -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-truth">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-info"></i> TRUTH AI
+                    </h5>
+                    <p class="text-secondary small mb-3">
+                        A rigorous multi-modal verification platform designed to combat digital disinformation,
+                        deepfakes, and manipulated claims using natural language stance classification and multi-source triangulation.
+                    </p>
+                    <div class="d-flex gap-3 text-secondary">
+                        <span class="badge bg-dark border border-secondary border-opacity-50">Capstone Project</span>
+                        <span class="badge bg-dark border border-secondary border-opacity-50">Level 4 Architecture</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h5>Verification</h5>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('views.news') }}">News & Claims</a></li>
+                        <li><a href="{{ url_for('views.image') }}">Image Forensics</a></li>
+                        <li><a href="{{ url_for('views.video') }}">Video Analysis</a></li>
+                        <li><a href="{{ url_for('views.history') }}">Verification Log</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h5>Methodology</h5>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('views.how_it_works') }}">How It Works</a></li>
+                        <li><a href="{{ url_for('views.about') }}">Academic Objectives</a></li>
+                        <li><a href="{{ url_for('views.privacy') }}">Privacy & Ethics Policy</a></li>
+                        <li><a href="{{ url_for('views.reviews') }}">User Reviews</a></li>
+                        <li><a href="{{ url_for('views.contact') }}">Submit Feedback</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h5>Ethical Standard</h5>
+                    <p class="text-secondary small">
+                        <strong>Principle of Uncertainty:</strong> A search result match does not establish truth.
+                        TRUTH AI surfaces supporting, contradicting, and missing contextual evidence to foster critical thinking.
+                    </p>
+                </div>
+            </div>
+
+            <hr class="border-secondary border-opacity-25 my-4">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-secondary">
+                <div>&copy; {{ current_year }} TRUTH AI — "Verify. Analyze. Trust." All rights reserved.</div>
+                <div class="mt-2 mt-md-0">
+                    <span class="text-info"><i class="fa-solid fa-circle-check me-1"></i> Production Ready</span> &bull; 
+                    <a href="{{ url_for('views.privacy') }}" class="text-secondary ms-2">Privacy Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <!-- Core App JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+
+    <!-- Multimodal AI Assistant (Screen Awareness & ChatGPT-like Solver) -->
+    {% include "components/assistant.html" %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
+</body>
+</html>

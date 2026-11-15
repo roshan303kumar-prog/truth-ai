@@ -1,0 +1,670 @@
+/* ==========================================================================
+   TRUTH AI — Primary Stylesheet
+   Verify. Analyze. Trust.
+   Design System: Deep Navy & Black, Cyan/Blue accents, Glassmorphism
+   ========================================================================== */
+
+:root {
+  --bg-dark: #070b14;
+  --bg-card: rgba(14, 23, 42, 0.82);
+  --bg-glass: rgba(15, 25, 48, 0.65);
+  --bg-input: #0a1120;
+  --border-subtle: rgba(56, 189, 248, 0.18);
+  --border-glow: rgba(0, 229, 255, 0.45);
+  --accent-cyan: #00e5ff;
+  --accent-blue: #3b82f6;
+  --accent-indigo: #6366f1;
+  --accent-cyan-glow: 0 0 20px rgba(0, 229, 255, 0.35);
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --verdict-supported: #10b981;
+  --verdict-false: #ef4444;
+  --verdict-misleading: #f59e0b;
+  --verdict-unverified: #00e5ff;
+  --verdict-insufficient: #94a3b8;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Base & Reset */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(0, 229, 255, 0.06) 0%, transparent 45%);
+  background-attachment: fixed;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  color: #38bdf8;
+  text-decoration: underline;
+}
+
+/* Navigation Bar */
+.navbar-truth {
+  background: rgba(7, 11, 20, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.85rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+  transition: var(--transition);
+}
+
+.navbar-truth .navbar-brand {
+  font-weight: 800;
+  font-size: 1.4rem;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-icon {
+  color: var(--accent-cyan);
+  filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.6));
+}
+
+.navbar-truth .nav-link {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.navbar-truth .nav-link:hover,
+.navbar-truth .nav-link.active {
+  color: #ffffff;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+/* Glassmorphism Cards */
+.truth-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition: var(--transition);
+}
+
+.truth-card:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+
+.card-title-glow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.75rem;
+}
+
+/* Buttons */
+.btn-truth-primary {
+  background: linear-gradient(135deg, var(--accent-blue) 0%, #0284c7 100%);
+  color: #ffffff;
+  font-weight: 600;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1.6rem;
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-truth-primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #0369a1 100%);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 229, 255, 0.4);
+}
+
+.btn-truth-cyan {
+  background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+  color: #ffffff;
+  font-weight: 600;
+  border: 1px solid rgba(0, 229, 255, 0.5);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1.6rem;
+  transition: var(--transition);
+}
+
+.btn-truth-cyan:hover {
+  background: linear-gradient(135deg, #0096c7 0%, #023e8a 100%);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: var(--accent-cyan-glow);
+}
+
+.btn-truth-outline {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1.4rem;
+  font-weight: 500;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-truth-outline:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-cyan);
+  color: #ffffff;
+}
+
+/* Forms & Inputs */
+.truth-input,
+.truth-textarea,
+.truth-select {
+  background-color: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1.1rem;
+  font-size: 1rem;
+  transition: var(--transition);
+  width: 100%;
+}
+
+.truth-input:focus,
+.truth-textarea:focus,
+.truth-select:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.15);
+  background-color: #0d1629;
+}
+
+.truth-input::placeholder,
+.truth-textarea::placeholder {
+  color: var(--text-dim);
+}
+
+/* Hero Section */
+.hero-section {
+  padding: 5rem 0 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 9999px;
+  color: var(--accent-cyan);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+
+.hero-title {
+  font-size: 3.2rem;
+  line-height: 1.15;
+  font-weight: 800;
+  margin-bottom: 1.25rem;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #ffffff 30%, var(--accent-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-lead {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  max-width: 650px;
+  margin: 0 auto 2.5rem;
+}
+
+/* Verdict Badges */
+.verdict-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1.1rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.badge-supported {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--verdict-supported);
+  border: 1px solid var(--verdict-supported);
+}
+
+.badge-false {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--verdict-false);
+  border: 1px solid var(--verdict-false);
+}
+
+.badge-misleading {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--verdict-misleading);
+  border: 1px solid var(--verdict-misleading);
+}
+
+.badge-unverified {
+  background: rgba(0, 229, 255, 0.15);
+  color: var(--verdict-unverified);
+  border: 1px solid var(--verdict-unverified);
+}
+
+.badge-insufficient {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--verdict-insufficient);
+  border: 1px solid var(--verdict-insufficient);
+}
+
+/* Confidence Meter */
+.confidence-meter-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+  height: 14px;
+  overflow: hidden;
+  position: relative;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.confidence-meter-bar {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 1s ease-in-out;
+}
+
+/* Dropzone */
+.truth-dropzone {
+  border: 2px dashed rgba(56, 189, 248, 0.35);
+  border-radius: var(--radius-md);
+  padding: 3rem 1.5rem;
+  text-align: center;
+  background: rgba(15, 23, 42, 0.5);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.truth-dropzone:hover,
+.truth-dropzone.dragover {
+  border-color: var(--accent-cyan);
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.1);
+}
+
+.dropzone-icon {
+  font-size: 3rem;
+  color: var(--accent-cyan);
+  margin-bottom: 1rem;
+}
+
+/* Multi-step Loading Animation */
+.analysis-progress-overlay {
+  display: none;
+  background: rgba(7, 11, 20, 0.92);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-md);
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.analysis-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(0, 229, 255, 0.15);
+  border-top-color: var(--accent-cyan);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.progress-steps-list {
+  list-style: none;
+  padding: 0;
+  max-width: 400px;
+  margin: 1.5rem auto 0;
+  text-align: left;
+}
+
+.progress-step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-dim);
+  margin-bottom: 0.6rem;
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+.progress-step-item.active {
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.progress-step-item.completed {
+  color: var(--verdict-supported);
+}
+
+/* Frame Gallery Carousel */
+.frame-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.frame-thumbnail-card {
+  background: #0a1120;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  position: relative;
+  transition: var(--transition);
+}
+
+.frame-thumbnail-card:hover {
+  border-color: var(--accent-cyan);
+  transform: scale(1.03);
+}
+
+.frame-thumbnail-card img {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  display: block;
+}
+
+.frame-meta-tag {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Footer */
+.footer-truth {
+  background: #05080f;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 3rem 0 2rem;
+  margin-top: 5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.footer-truth h5 {
+  color: #ffffff;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+  color: var(--text-muted);
+}
+
+.footer-links a:hover {
+  color: var(--accent-cyan);
+}
+
+/* Alert Boxes */
+.truth-alert {
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid transparent;
+}
+
+.alert-limitations {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fde68a;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.3rem;
+  }
+  .truth-card {
+    padding: 1.25rem;
+  }
+}
+
+/* ==========================================================================
+   Voice Features: Microphone Input (STT) & AI Voice Result (TTS)
+   ========================================================================== */
+.voice-input-btn {
+  transition: var(--transition);
+  border-color: rgba(0, 229, 255, 0.4);
+  color: var(--accent-cyan);
+}
+
+.voice-input-btn:hover {
+  background: rgba(0, 229, 255, 0.15);
+  color: #ffffff;
+  border-color: var(--accent-cyan);
+}
+
+.voice-recording-active {
+  animation: pulse-recording 1.2s infinite;
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+@keyframes pulse-recording {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+/* Voice Narration Player Widget */
+.voice-result-card {
+  background: rgba(10, 20, 38, 0.85);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+
+.voice-result-card:hover {
+  border-color: rgba(0, 229, 255, 0.45);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.12);
+}
+
+.voice-play-btn {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  border: none;
+  color: #070b14;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.voice-play-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.55);
+}
+
+.voice-play-btn.speaking {
+  background: linear-gradient(135deg, #ef4444, #f59e0b);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.45);
+}
+
+/* Audio Wave Visualizer */
+.audio-wave-bars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+}
+
+.audio-wave-bars .wave-bar {
+  display: inline-block;
+  width: 3px;
+  height: 100%;
+  background: var(--accent-cyan);
+  border-radius: 2px;
+  animation: wave-animation 1s ease-in-out infinite;
+}
+
+.audio-wave-bars .wave-bar:nth-child(1) { animation-delay: 0.1s; }
+.audio-wave-bars .wave-bar:nth-child(2) { animation-delay: 0.3s; }
+.audio-wave-bars .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.audio-wave-bars .wave-bar:nth-child(4) { animation-delay: 0.4s; }
+.audio-wave-bars .wave-bar:nth-child(5) { animation-delay: 0.15s; }
+
+@keyframes wave-animation {
+  0%, 100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* Voice Gender Toggle */
+.voice-gender-toggle {
+  background: rgba(7, 11, 20, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.voice-gender-btn {
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 0.28rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.voice-gender-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.voice-gender-btn.active {
+  background: rgba(14, 28, 56, 0.95);
+  color: #ffffff;
+  border-color: rgba(0, 229, 255, 0.5);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+}
+
+/* Reviewer Avatar Initials & Star Rating Interaction */
+.user-avatar-initials {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00e5ff, #3b82f6);
+  color: #070b14;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.star-rate-item {
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.star-rate-item:hover {
+  transform: scale(1.2);
+}
+.review-filter-btn.active {
+  background: rgba(0, 229, 255, 0.18) !important;
+  border-color: #00e5ff !important;
+  color: #ffffff !important;
+}

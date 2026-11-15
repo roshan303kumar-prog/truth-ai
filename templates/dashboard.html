@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard — TRUTH AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Welcome Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <span class="hero-pill mb-1"><i class="fa-solid fa-chart-pie"></i> Personal Intelligence Center</span>
+            <h1 class="fw-bold mb-1">Welcome back, {{ current_user.full_name or current_user.username }}</h1>
+            <p class="text-secondary small mb-0">Overview of your verification activity, saved investigations, and analytical breakdown.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('views.news') }}" class="btn btn-truth-primary btn-sm">
+                <i class="fa-solid fa-bolt me-1"></i> New Check
+            </a>
+            <a href="{{ url_for('views.history') }}" class="btn btn-truth-outline btn-sm">
+                <i class="fa-solid fa-clock-rotate-left me-1"></i> Full Log
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Metric Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="truth-card p-3 text-center h-100">
+                <span class="text-secondary small text-uppercase">Total Checks</span>
+                <h3 class="fw-bold text-white mb-0 mt-1">{{ total_count }}</h3>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="truth-card p-3 text-center h-100 border-success border-opacity-25">
+                <span class="text-success small text-uppercase">Supported</span>
+                <h3 class="fw-bold text-success mb-0 mt-1">{{ supported_count }}</h3>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="truth-card p-3 text-center h-100 border-danger border-opacity-25">
+                <span class="text-danger small text-uppercase">Contradicted</span>
+                <h3 class="fw-bold text-danger mb-0 mt-1">{{ contradicted_count }}</h3>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="truth-card p-3 text-center h-100 border-warning border-opacity-25">
+                <span class="text-warning small text-uppercase">Misleading</span>
+                <h3 class="fw-bold text-warning mb-0 mt-1">{{ misleading_count }}</h3>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="truth-card p-3 text-center h-100 border-info border-opacity-25">
+                <span class="text-info small text-uppercase">Unverified</span>
+                <h3 class="fw-bold text-info mb-0 mt-1">{{ unverified_count }}</h3>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="truth-card p-3 text-center h-100 border-secondary border-opacity-25">
+                <span class="text-secondary small text-uppercase">Saved Reports</span>
+                <h3 class="fw-bold text-white mb-0 mt-1">{{ saved_reports|length }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Outcome Doughnut -->
+        <div class="col-lg-6">
+            <div class="truth-card p-4 h-100">
+                <h5 class="card-title-glow text-white">
+                    <i class="fa-solid fa-chart-pie text-info"></i> Verification Outcomes Distribution
+                </h5>
+                <div style="height: 260px; position: relative;">
+                    <canvas id="outcomeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modality Bar -->
+        <div class="col-lg-6">
+            <div class="truth-card p-4 h-100">
+                <h5 class="card-title-glow text-white">
+                    <i class="fa-solid fa-chart-simple text-info"></i> Activity by Modality (News / Image / Video)
+                </h5>
+                <div style="height: 260px; position: relative;">
+                    <canvas id="modalityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Verifications & Bookmarked Grid -->
+    <div class="row g-4 mb-4">
+        <!-- Recent Checks -->
+        <div class="col-lg-7">
+            <div class="truth-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="text-white mb-0"><i class="fa-solid fa-clock-rotate-left text-info me-2"></i> Recent Activity</h5>
+                    <a href="{{ url_for('views.history') }}" class="small text-secondary">View All</a>
+                </div>
+                {% if recent_reports %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover table-sm align-middle mb-0" style="background: transparent;">
+                        <thead>
+                            <tr class="text-secondary small border-bottom border-secondary border-opacity-25">
+                                <th>Subject</th>
+                                <th>Verdict</th>
+                                <th>Confidence</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in recent_reports %}
+                            <tr class="border-bottom border-secondary border-opacity-10">
+                                <td>
+                                    <a href="{{ url_for('views.report_detail', report_id=r.id) }}" class="text-white small fw-medium text-decoration-none d-block text-truncate" style="max-width: 200px;">
+                                        {{ r.title_or_claim }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% set meta = get_verdict_meta(r.verdict) %}
+                                    <span class="verdict-badge {{ meta.badge_class }} py-0 px-2 small" style="font-size: 0.75rem;">
+                                        {{ r.verdict.split(' ')[0] }}
+                                    </span>
+                                </td>
+                                <td class="small text-white">{{ r.confidence_score|round|int }}%</td>
+                                <td class="small text-secondary">{{ r.created_at|timeago }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-secondary small mb-0">No verification activity recorded yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Bookmarked Reports -->
+        <div class="col-lg-5">
+            <div class="truth-card p-4 h-100">
+                <h5 class="text-white mb-3"><i class="fa-solid fa-bookmark text-warning me-2"></i> Saved Reports ({{ saved_reports|length }})</h5>
+                {% if saved_reports %}
+                <div class="vstack gap-2" style="max-height: 280px; overflow-y: auto;">
+                    {% for s in saved_reports %}
+                    <div class="p-2 rounded bg-dark border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                        <div class="text-truncate me-2" style="max-width: 260px;">
+                            <a href="{{ url_for('views.report_detail', report_id=s.id) }}" class="text-white small text-decoration-none fw-medium d-block text-truncate">
+                                {{ s.title_or_claim }}
+                            </a>
+                            <small class="text-secondary" style="font-size: 0.75rem;">{{ s.created_at|timeago }}</small>
+                        </div>
+                        <a href="{{ url_for('views.report_detail', report_id=s.id) }}" class="btn btn-sm btn-truth-outline py-0 px-2" title="View Report">
+                            <i class="fa-solid fa-arrow-right small"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-secondary small">
+                    <i class="fa-regular fa-bookmark fs-3 mb-2 d-block"></i>
+                    No saved reports. Click the bookmark icon on any verification to pin it here.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

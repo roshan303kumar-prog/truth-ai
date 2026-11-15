@@ -1,0 +1,159 @@
+<!-- TRUTH AI — Floating Multimodal AI Assistant Component (NEO) -->
+<div id="truth-ai-assistant-wrapper">
+    <!-- Floating Launcher Trigger Button with Robot Icon & AI Assistant Label -->
+    <div id="assistant-launcher-wrapper" class="assistant-launcher-wrapper">
+        <button type="button" id="assistant-launcher" class="assistant-launcher-btn" title="Open NEO (AI Assistant)">
+            <span class="assistant-pulse-ring"></span>
+            <div class="assistant-launcher-icon">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <span class="assistant-name-tag">NEO</span>
+            <span class="assistant-launcher-tooltip">Chat with NEO</span>
+        </button>
+        <div class="assistant-bottom-label">
+            <span>AI Assistant</span>
+        </div>
+    </div>
+
+    <!-- Main ChatGPT-Style Assistant Window -->
+    <div id="assistant-window" class="assistant-window shadow-2xl" role="dialog" aria-label="NEO AI Assistant" style="display: none;">
+        <!-- Header -->
+        <div class="assistant-header">
+            <div class="d-flex align-items-center gap-2">
+                <div class="assistant-avatar">
+                    <i class="fa-solid fa-robot text-info"></i>
+                    <span class="assistant-online-dot" title="NEO Online & Vision Ready"></span>
+                </div>
+                <div>
+                    <h6 class="assistant-title mb-0">NEO <span class="badge bg-info bg-opacity-25 text-info ms-1" style="font-size: 0.65rem;">AI</span></h6>
+                    <small class="assistant-subtitle">AI Assistant &bull; Screen-Aware</small>
+                </div>
+            </div>
+            <div class="assistant-header-actions d-flex align-items-center gap-1">
+                <button type="button" id="assistant-btn-new-chat" class="assistant-header-btn" title="New Chat Session">
+                    <i class="fa-regular fa-pen-to-square"></i>
+                </button>
+                <button type="button" id="assistant-btn-theme" class="assistant-header-btn" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-circle-half-stroke"></i>
+                </button>
+                <button type="button" id="assistant-btn-maximize" class="assistant-header-btn" title="Maximize Window">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+                <button type="button" id="assistant-btn-close" class="assistant-header-btn text-danger" title="Close Assistant">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Messages Container -->
+        <div id="assistant-messages" class="assistant-messages">
+            <!-- Welcome Card (Shown on Empty/New Chat) -->
+            <div id="assistant-welcome-card" class="assistant-welcome-card">
+                <div class="assistant-welcome-icon">
+                    <i class="fa-solid fa-robot text-info"></i>
+                </div>
+                <h5 class="fw-bold text-white mb-2">Hi, I'm NEO 👋</h5>
+                <p class="text-secondary small mb-3">
+                    Your personal AI Assistant with <strong>Website Screen Awareness</strong>.
+                    Ask any question, share your screen, troubleshoot errors, or ask where to click.
+                </p>
+                <div class="assistant-features-badge-group mb-3">
+                    <span class="badge bg-dark border border-secondary border-opacity-50 text-info">
+                        <i class="fa-solid fa-camera me-1"></i> Screen Capture
+                    </span>
+                    <span class="badge bg-dark border border-secondary border-opacity-50 text-success">
+                        <i class="fa-solid fa-language me-1"></i> Hindi / English / Hinglish
+                    </span>
+                    <span class="badge bg-dark border border-secondary border-opacity-50 text-warning">
+                        <i class="fa-solid fa-bug me-1"></i> Bug & UI Solver
+                    </span>
+                </div>
+
+                <div class="assistant-prompt-suggestions">
+                    <small class="text-secondary d-block fw-semibold mb-2">Try asking or clicking:</small>
+                    <button type="button" class="assistant-prompt-chip" data-prompt="What is this page for and what can I do here?">
+                        <i class="fa-solid fa-compass text-info me-1"></i> What can I do on this page?
+                    </button>
+                    <button type="button" class="assistant-prompt-chip" data-prompt="Where should I click next on this screen?">
+                        <i class="fa-solid fa-arrow-pointer text-warning me-1"></i> Where should I click next?
+                    </button>
+                    <button type="button" class="assistant-prompt-chip" data-prompt="Scan this page for any errors, issues, or wrong inputs.">
+                        <i class="fa-solid fa-shield-virus text-danger me-1"></i> Check screen for errors
+                    </button>
+                    <button type="button" class="assistant-prompt-chip" data-prompt="How does TRUTH AI verify claims and detect fake news?">
+                        <i class="fa-solid fa-brain text-success me-1"></i> How does TRUTH AI verify claims?
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages are dynamically injected here -->
+        </div>
+
+        <!-- Typing Indicator (Hidden by default) -->
+        <div id="assistant-typing-indicator" class="assistant-typing-container" style="display: none;">
+            <div class="assistant-avatar-small">
+                <i class="fa-solid fa-shield-halved text-info"></i>
+            </div>
+            <div class="assistant-typing-bubble">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <small class="text-secondary ms-2">Analyzing...</small>
+            </div>
+        </div>
+
+        <!-- Attached Screenshot Preview Bar (Hidden until screen captured) -->
+        <div id="assistant-screen-preview-bar" class="assistant-screen-preview-bar" style="display: none;">
+            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                <img id="assistant-preview-img" src="" alt="Screen Attachment" class="assistant-preview-thumbnail">
+                <div class="overflow-hidden">
+                    <span class="assistant-preview-badge d-block text-truncate">
+                        <i class="fa-solid fa-desktop text-info me-1"></i> <span id="assistant-preview-label">Current Page Screen Attached</span>
+                    </span>
+                    <small class="text-secondary" style="font-size: 0.72rem;">AI will inspect this visual screen</small>
+                </div>
+            </div>
+            <button type="button" id="assistant-btn-remove-screen" class="assistant-preview-remove-btn" title="Remove Screen Attachment">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Quick Visual Capture Toolbar -->
+        <div class="assistant-toolbar">
+            <button type="button" id="assistant-btn-capture-page" class="assistant-tool-btn" title="Capture instant snapshot of current webpage">
+                <i class="fa-solid fa-camera text-info"></i> <span>Capture Page</span>
+            </button>
+            <button type="button" id="assistant-btn-share-screen" class="assistant-tool-btn" title="Share full desktop window or browser screen">
+                <i class="fa-solid fa-desktop text-warning"></i> <span>Share Screen</span>
+            </button>
+            <button type="button" id="assistant-btn-upload-image" class="assistant-tool-btn" title="Upload screenshot or photo from disk">
+                <i class="fa-solid fa-image text-success"></i> <span>Upload Image</span>
+            </button>
+            <input type="file" id="assistant-file-input" accept="image/*" style="display: none;">
+        </div>
+
+        <!-- Input Area -->
+        <div class="assistant-input-area">
+            <form id="assistant-chat-form" class="d-flex align-items-end gap-2">
+                <textarea
+                    id="assistant-input"
+                    class="assistant-textarea"
+                    rows="1"
+                    placeholder="Ask anything, describe a problem, or share your screen..."
+                    required
+                ></textarea>
+                <button type="submit" id="assistant-btn-send" class="assistant-send-btn" title="Send message (Enter)">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+            <div class="assistant-input-footer d-flex justify-content-between align-items-center mt-1">
+                <small class="text-secondary" style="font-size: 0.7rem;">
+                    <i class="fa-solid fa-lock text-info me-1"></i> Screen shared only when you permit
+                </small>
+                <small class="text-secondary" style="font-size: 0.7rem;">
+                    Shift + Enter for new line
+                </small>
+            </div>
+        </div>
+    </div>
+</div>

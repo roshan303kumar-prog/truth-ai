@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}Report #{{ report.id }} — {{ report.title_or_claim }} | TRUTH AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Breadcrumb / Header Actions -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                <div>
+                    <a href="{{ url_for('views.history') }}" class="text-secondary small text-decoration-none">
+                        <i class="fa-solid fa-arrow-left me-1"></i> Back to History
+                    </a>
+                    <h1 class="fw-bold mb-0 mt-1">Verification Report #{{ report.id }}</h1>
+                </div>
+                <div class="d-flex gap-2">
+                    {% if current_user.is_authenticated and report.user_id == current_user.id %}
+                    <button type="button" class="btn btn-truth-outline btn-sm {% if report.is_saved %}text-warning{% endif %}" onclick="toggleBookmark({{ report.id }}, this)">
+                        <i class="{% if report.is_saved %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark me-1"></i>
+                        {{ 'Saved' if report.is_saved else 'Save Report' }}
+                    </button>
+                    {% endif %}
+                    <button type="button" class="btn btn-truth-outline btn-sm" onclick="copyShareLink()">
+                        <i class="fa-solid fa-share-nodes me-1"></i> Share
+                    </button>
+                    <button type="button" class="btn btn-truth-outline btn-sm" onclick="window.print()">
+                        <i class="fa-solid fa-print me-1"></i> Print / PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Report Card -->
+            <div class="truth-card mb-4 shadow-lg">
+                <!-- Meta Info Header -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25 gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-secondary bg-opacity-25 text-info text-uppercase">
+                            {{ report.verification_type }} Verification
+                        </span>
+                        <span class="text-secondary small">&bull; Generated {{ report.created_at.strftime('%B %d, %Y at %H:%M UTC') if report.created_at else 'Recently' }}</span>
+                    </div>
+                    <span class="badge bg-dark border border-secondary text-secondary small">
+                        TRUTH AI Audit Engine v2.4
+                    </span>
+                </div>
+
+                <!-- Submitted Content Banner -->
+                <div class="p-3 mb-4 rounded bg-dark border border-secondary border-opacity-25">
+                    <small class="text-secondary text-uppercase d-block mb-1">Subject of Investigation</small>
+                    <h5 class="text-white mb-0">{{ report.title_or_claim }}</h5>
+                    {% if report.submitted_content and report.submitted_content != report.title_or_claim %}
+                    <p class="text-secondary small mt-2 mb-0 font-monospace">{{ report.submitted_content }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Official Verdict & Confidence Tier -->
+                <div class="row align-items-center g-4 mb-4 pb-4 border-bottom border-secondary border-opacity-25">
+                    <div class="col-md-7">
+                        <small class="text-secondary text-uppercase d-block mb-2">Final Verification Assessment</small>
+                        <div class="verdict-badge {{ verdict_meta.badge_class }} fs-6 py-2 px-3">
+                            <i class="fa-solid {{ verdict_meta.icon }} fs-5"></i>
+                            <span>{{ report.verdict }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="truth-card p-3 bg-dark">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="small text-secondary fw-semibold">{{ confidence_tier }}</span>
+                                <span class="fw-bold fs-5 text-white">{{ report.confidence_score|round|int }}%</span>
+                            </div>
+                            <div class="confidence-meter-container mb-2">
+                                <div class="confidence-meter-bar" style="width: {{ report.confidence_score }}%; background-color: {{ verdict_meta.color }};"></div>
+                            </div>
+                            <small class="text-secondary d-block" style="font-size: 0.78rem;">{{ confidence_desc }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transparent Explanation -->
+                <div class="mb-4">
+                    <h5 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-brain text-info"></i> Evidence-Grounded Explanation
+                    </h5>
+                    <div class="p-3 rounded bg-dark border border-secondary border-opacity-25">
+                        <p class="text-white mb-0" style="line-height: 1.7;">{{ report.explanation }}</p>
+                    </div>
+                </div>
+
+                <!-- News Specific Section: Supporting vs Contradicting Evidence -->
+                {% if report.verification_type == 'news' %}
+                <div class="row g-4 mb-4">
+                    <!-- Supporting -->
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100 bg-dark bg-opacity-50 border-success border-opacity-25">
+                            <h6 class="text-success fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-circle-check"></i> Corroborating Evidence ({{ report.supporting_evidence|length }})
+                            </h6>
+                            {% if report.supporting_evidence %}
+                                {% for item in report.supporting_evidence %}
+                                <div class="p-3 mb-2 rounded bg-dark border border-secondary border-opacity-25">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge bg-success bg-opacity-25 text-success">{{ item.source }}</span>
+                                        <small class="text-secondary">{{ item.published_date or 'Archive' }}</small>
+                                    </div>
+                                    <h6 class="text-white mb-1 small fw-bold">{{ item.title }}</h6>
+                                    <p class="text-secondary small mb-1">{{ item.snippet }}</p>
+                                    {% if item.url %}
+                                    <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="small text-info">
+                                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> View Citation
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-secondary small fst-italic mb-0">No direct corroborating records identified.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Contradicting -->
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100 bg-dark bg-opacity-50 border-danger border-opacity-25">
+                            <h6 class="text-danger fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-circle-xmark"></i> Contradicting Evidence ({{ report.contradicting_evidence|length }})
+                            </h6>
+                            {% if report.contradicting_evidence %}
+                                {% for item in report.contradicting_evidence %}
+                                <div class="p-3 mb-2 rounded bg-dark border border-secondary border-opacity-25">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge bg-danger bg-opacity-25 text-danger">{{ item.source }}</span>
+                                        <small class="text-secondary">{{ item.published_date or 'Investigation' }}</small>
+                                    </div>
+                                    <h6 class="text-white mb-1 small fw-bold">{{ item.title }}</h6>
+                                    <p class="text-secondary small mb-1">{{ item.snippet }}</p>
+                                    {% if item.url %}
+                                    <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="small text-danger">
+                                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> View Refutation
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-secondary small fst-italic mb-0">No direct authoritative refutations located.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Image Specific Section -->
+                {% if report.verification_type == 'image' %}
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100">
+                            <h6 class="text-white mb-2"><i class="fa-regular fa-image text-info me-1"></i> Original Photo</h6>
+                            <div class="text-center bg-black rounded p-2 overflow-hidden" style="min-height: 220px; display: flex; align-items: center; justify-content: center;">
+                                {% if report.media_filename %}
+                                <img src="/uploads/images/{{ report.media_filename }}" alt="Uploaded" class="img-fluid rounded" style="max-height: 280px; object-fit: contain;">
+                                {% else %}
+                                <span class="text-secondary small">Image stored in archive</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100">
+                            <h6 class="text-white mb-2"><i class="fa-solid fa-fire-flame-curved text-warning me-1"></i> Error Level Analysis Heatmap</h6>
+                            <div class="text-center bg-black rounded p-2 overflow-hidden" style="min-height: 220px; display: flex; align-items: center; justify-content: center;">
+                                {% if report.media_ela_path %}
+                                <img src="/uploads/ela/{{ report.media_ela_path }}" alt="ELA Analysis" class="img-fluid rounded" style="max-height: 280px; object-fit: contain;">
+                                {% else %}
+                                <span class="text-secondary small">ELA heatmap not generated</span>
+                                {% endif %}
+                            </div>
+                            <small class="text-secondary d-block mt-2 fst-italic">
+                                High localized brightness indicates compression discrepancies from potential splicing.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Video Specific Section -->
+                {% if report.verification_type == 'video' %}
+                <div class="mb-4">
+                    <h6 class="text-white fw-bold mb-3"><i class="fa-solid fa-images text-info me-1"></i> Sampled Keyframe Analysis</h6>
+                    {% set kfs = report.technical_findings.get('analyzed_frames', []) %}
+                    {% if kfs %}
+                    <div class="frame-gallery mb-3">
+                        {% for f in kfs %}
+                        <div class="frame-thumbnail-card">
+                            <img src="/uploads/videos/frames/{{ f.filename }}" alt="Frame" loading="lazy">
+                            <div class="frame-meta-tag">
+                                <span>{{ f.timestamp }}</span>
+                                <span>Sharpness: {{ f.sharpness_score }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Link & URL Forensics Section -->
+                {% if report.verification_type == 'link' %}
+                {% set tf = report.technical_findings or {} %}
+                {% if tf.get('impersonated_brand') %}
+                <div class="truth-alert alert-limitations mb-4" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.5); color: #fca5a5;">
+                    <h6 class="fw-bold mb-1 text-danger">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i> Critical Phishing Alert: Brand Impersonation Detected
+                    </h6>
+                    <p class="mb-1 small">
+                        This URL attempts to disguise itself as <strong>{{ tf.get('impersonated_brand') }}</strong> without authorization.
+                    </p>
+                    <div class="small fw-semibold text-white">
+                        Official Genuine Website: <span class="text-info text-decoration-underline">{{ tf.get('official_brand_domain') }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="row g-4 mb-4">
+                    <!-- Red Flags / Threat Indicators -->
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100 bg-dark bg-opacity-50 border-danger border-opacity-25">
+                            <h6 class="text-danger fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Threat Indicators & Red Flags ({{ report.contradicting_evidence|length }})
+                            </h6>
+                            {% if report.contradicting_evidence %}
+                                {% for item in report.contradicting_evidence %}
+                                <div class="p-2 mb-2 rounded bg-dark border border-danger border-opacity-25 small text-white d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-xmark text-danger"></i>
+                                    <span>{{ item.title }}</span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-secondary small fst-italic mb-0">No suspicious behavioral indicators triggered.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Security Markers / Certified Checks -->
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100 bg-dark bg-opacity-50 border-success border-opacity-25">
+                            <h6 class="text-success fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-shield-halved"></i> Security & Authentication Checks ({{ report.supporting_evidence|length }})
+                            </h6>
+                            {% if report.supporting_evidence %}
+                                {% for item in report.supporting_evidence %}
+                                <div class="p-2 mb-2 rounded bg-dark border border-success border-opacity-25 small text-white d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-check text-success"></i>
+                                    <span>{{ item.title }}</span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-secondary small fst-italic mb-0">No institutional certificates or whitelist records found.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Domain Telemetry -->
+                {% set audit = tf.get('technical_audit', {}) %}
+                {% if audit %}
+                <div class="truth-card p-3 mb-4 bg-dark bg-opacity-50 border-secondary border-opacity-25">
+                    <h6 class="text-secondary small fw-bold text-uppercase mb-3">Domain Architecture Telemetry</h6>
+                    <div class="row g-3 text-center">
+                        <div class="col-4 col-md-2">
+                            <small class="text-secondary d-block">Host Protocol</small>
+                            <span class="fw-bold text-white">{{ audit.get('protocol', 'UNKNOWN') }}</span>
+                        </div>
+                        <div class="col-4 col-md-2">
+                            <small class="text-secondary d-block">TLD Category</small>
+                            <span class="fw-bold text-white">.{{ audit.get('tld', '').upper() }}</span>
+                        </div>
+                        <div class="col-4 col-md-3">
+                            <small class="text-secondary d-block">Domain Randomness</small>
+                            <span class="fw-bold text-white">{{ audit.get('domain_entropy', 0)|round(2) }} ({{ 'High' if audit.get('is_suspicious_entropy') else 'Low' }})</span>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <small class="text-secondary d-block">IP Host</small>
+                            <span class="fw-bold text-white">{{ 'Yes' if audit.get('is_ip_address') else 'No' }}</span>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <small class="text-secondary d-block">Shortener</small>
+                            <span class="fw-bold text-white">{{ 'Yes' if audit.get('is_shortener') else 'No' }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+
+                <!-- Direct Source Citations -->
+                {% if report.source_links %}
+                <div class="mb-4">
+                    <h6 class="text-white fw-bold mb-2">
+                        <i class="fa-solid fa-link text-info me-1"></i> Verified References & Citations
+                    </h6>
+                    <ul class="list-unstyled mb-0">
+                        {% for src in report.source_links %}
+                        <li class="mb-2">
+                            <a href="{{ src.url }}" target="_blank" rel="noopener noreferrer" class="text-info">
+                                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> {{ src.title or src.publisher or src.engine }}
+                            </a>
+                            {% if src.publisher %}
+                            <span class="text-secondary small ms-2">({{ src.publisher }})</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Limitations & Uncertainty Box -->
+                <div class="truth-alert alert-limitations mb-0">
+                    <h6 class="fw-bold mb-2"><i class="fa-solid fa-triangle-exclamation me-1"></i> Methodological Limitations</h6>
+                    <ul class="mb-0 small ps-3">
+                        {% if report.limitations %}
+                            {% for lim in report.limitations %}
+                            <li>{{ lim }}</li>
+                            {% endfor %}
+                        {% else %}
+                            <li>Verification reflects publicly accessible databases at the moment of scanning.</li>
+                            <li>Automated NLP models can misinterpret subtle sarcasm or rhetorical hyperbole.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

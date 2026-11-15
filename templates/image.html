@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Image Forensics & Splicing Analysis — TRUTH AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <span class="hero-pill mb-2"><i class="fa-regular fa-image"></i> Optical Forensics & AI Synthesis Audit</span>
+                <h1 class="fw-bold mb-2">Image Verification & Forensic Inspection</h1>
+                <p class="text-secondary">
+                    Analyze photographs for digital editing, compression inconsistencies via Error Level Analysis (ELA),
+                    hardware camera metadata, and generative AI artifacts.
+                </p>
+            </div>
+
+            <!-- Upload Card -->
+            <div class="truth-card mb-4 shadow-lg">
+                <div id="image-dropzone" class="truth-dropzone mb-3">
+                    <i class="fa-solid fa-cloud-arrow-up dropzone-icon"></i>
+                    <h5 class="text-white mb-1">Drag & Drop Image Here or Click to Browse</h5>
+                    <p class="text-secondary small mb-0">Supports JPG, JPEG, PNG, and WEBP formats (Max 10 MB)</p>
+                    <input type="file" id="image-file-input" accept=".jpg,.jpeg,.png,.webp" style="display: none;">
+                </div>
+
+                <!-- Preview Area -->
+                <div id="image-preview-container" class="p-3 rounded bg-dark border border-secondary border-opacity-25 mb-3" style="display: none;">
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                        <img id="image-preview" src="#" alt="Preview" class="rounded border border-secondary" style="max-height: 90px; max-width: 120px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <h6 id="preview-filename" class="text-white mb-1 text-truncate" style="max-width: 350px;">filename.jpg</h6>
+                            <span id="preview-filesize" class="badge bg-secondary bg-opacity-25 text-info">0 MB</span>
+                        </div>
+                        <button type="button" id="image-verify-btn" class="btn btn-truth-primary" disabled>
+                            <i class="fa-solid fa-microscope me-1"></i> Run Forensic Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Progress Overlay -->
+            <div id="image-analysis-progress" class="truth-card analysis-progress-overlay mb-4">
+                <div class="analysis-spinner"></div>
+                <h4 class="text-white fw-bold mb-2">Conducting Optical & Forensic Scan</h4>
+                <p class="text-secondary small">Computing compression differences & auditing metadata headers...</p>
+                
+                <ul class="progress-steps-list">
+                    <li class="progress-step-item active" id="img-step-1">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Auditing EXIF metadata, camera tags & editing signatures
+                    </li>
+                    <li class="progress-step-item" id="img-step-2">
+                        <i class="fa-solid fa-circle-notch"></i> Generating Error Level Analysis (ELA) compression heatmap
+                    </li>
+                    <li class="progress-step-item" id="img-step-3">
+                        <i class="fa-solid fa-circle-notch"></i> Checking frequency-domain AI generation signatures
+                    </li>
+                    <li class="progress-step-item" id="img-step-4">
+                        <i class="fa-solid fa-circle-notch"></i> Extracting embedded OCR text & reverse-search queries
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Result Card -->
+            <div id="image-result-container" class="truth-card mb-4" style="display: none;">
+                <!-- Header / Verdict Bar -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25 gap-3">
+                    <div>
+                        <span class="text-secondary small text-uppercase d-block mb-1">Verification Assessment & Modality</span>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <div id="img-verdict-badge" class="verdict-badge">
+                                <i id="img-verdict-icon" class="fa-solid fa-circle-info"></i>
+                                <span id="img-verdict-text">Processing...</span>
+                            </div>
+                            <span id="img-detected-type" class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-50 py-2 px-3" style="font-size: 0.9rem;">
+                                <i class="fa-solid fa-layer-group me-1"></i> Detecting Type...
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="text-secondary small d-block">Confidence Level</span>
+                        <span id="img-confidence-score" class="fs-4 fw-bold text-white">0%</span>
+                    </div>
+                </div>
+
+                <!-- Confidence Bar -->
+                <div class="confidence-meter-container mb-4">
+                    <div id="img-confidence-bar" class="confidence-meter-bar" style="width: 0%;"></div>
+                </div>
+
+                <!-- Explanation -->
+                <div class="p-3 mb-4 rounded bg-dark border border-secondary border-opacity-25">
+                    <h6 class="text-info fw-bold mb-2">
+                        <i class="fa-solid fa-brain me-1"></i> Technical Forensic Evaluation
+                    </h6>
+                    <p id="img-explanation-text" class="text-white mb-0"></p>
+                </div>
+
+                <!-- Side-by-side Original vs ELA -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100">
+                            <h6 class="text-white mb-2"><i class="fa-regular fa-image text-info me-1"></i> Uploaded Original</h6>
+                            <div class="text-center bg-black rounded p-2 overflow-hidden" style="min-height: 220px; display: flex; align-items: center; justify-content: center;">
+                                <img id="img-original-display" src="#" alt="Original" class="img-fluid rounded" style="max-height: 280px; object-fit: contain;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100">
+                            <h6 class="text-white mb-2"><i class="fa-solid fa-fire-flame-curved text-warning me-1"></i> Error Level Analysis (ELA)</h6>
+                            <div class="text-center bg-black rounded p-2 overflow-hidden" style="min-height: 220px; display: flex; align-items: center; justify-content: center;">
+                                <img id="img-ela-display" src="#" alt="ELA Heatmap" class="img-fluid rounded" style="max-height: 280px; object-fit: contain;">
+                            </div>
+                            <small id="img-ela-notes" class="text-secondary d-block mt-2 fst-italic"></small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Findings: Metadata & AI Assessment Grid -->
+                <div class="row g-4 mb-4">
+                    <!-- EXIF Metadata -->
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100">
+                            <h6 class="card-title-glow text-white">
+                                <i class="fa-solid fa-camera text-info"></i> EXIF & Camera Metadata
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-dark table-sm table-borderless text-secondary mb-0">
+                                    <tbody id="img-metadata-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Generation Assessment -->
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100">
+                            <h6 class="card-title-glow text-white">
+                                <i class="fa-solid fa-robot text-info"></i> AI Synthesis Evaluation
+                            </h6>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-secondary small">Synthetic Probability:</span>
+                                <span id="img-ai-risk-score" class="fw-bold text-info fs-5">0%</span>
+                            </div>
+                            <div id="img-ai-assessment" class="badge bg-dark border border-secondary text-white mb-3">
+                                Inconclusive
+                            </div>
+                            <h6 class="text-white small mb-1">Detected Indicators:</h6>
+                            <ul id="img-ai-indicators" class="ps-3 text-secondary small mb-0"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OCR Findings -->
+                <div class="p-3 mb-4 rounded bg-dark border border-secondary border-opacity-25">
+                    <h6 class="text-white fw-bold mb-2">
+                        <i class="fa-solid fa-font text-info me-1"></i> Extracted On-Image Text (OCR)
+                    </h6>
+                    <p id="img-ocr-text" class="text-secondary small font-monospace mb-0"></p>
+                </div>
+
+                <!-- Reverse Image Search Links -->
+                <div class="mb-4">
+                    <h6 class="text-white fw-bold mb-2">
+                        <i class="fa-solid fa-arrows-split-up-and-left text-info me-1"></i> Multi-Engine Reverse Image Search
+                    </h6>
+                    <p class="text-secondary small mb-2">Cross-reference this image on global indexes to discover original dates and duplicates:</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="https://lens.google.com/upload" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-truth-outline">
+                            <i class="fa-brands fa-google me-1"></i> Google Lens
+                        </a>
+                        <a href="https://tineye.com" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-truth-outline">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> TinEye
+                        </a>
+                        <a href="https://yandex.com/images/search" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-truth-outline">
+                            <i class="fa-solid fa-globe me-1"></i> Yandex Visual
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Limitations Notice -->
+                <div class="truth-alert alert-limitations mb-4">
+                    <h6 class="fw-bold mb-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> Important Forensics Notice</h6>
+                    <p class="small mb-0">
+                        Metadata alone cannot prove an image is authentic, as it can be wiped by social messaging platforms.
+                        Similarly, ELA highlights compression boundaries and should be interpreted as an indicator, not definitive proof.
+                    </p>
+                </div>
+
+                <!-- Action Toolbar -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top border-secondary border-opacity-25">
+                    <a id="img-full-report-link" href="#" class="btn btn-truth-outline btn-sm">
+                        <i class="fa-solid fa-file-lines me-1"></i> View Full Printable Report
+                    </a>
+                    <button type="button" class="btn btn-truth-outline btn-sm" onclick="copyShareLink()">
+                        <i class="fa-solid fa-share-nodes me-1"></i> Share Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/image.js') }}"></script>
+{% endblock %}

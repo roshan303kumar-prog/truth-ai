@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}How It Works — TRUTH AI Verification Pipeline{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="text-center mb-5">
+                <span class="hero-pill mb-2"><i class="fa-solid fa-gears"></i> Algorithmic Transparency</span>
+                <h1 class="fw-bold mb-3">How TRUTH AI Works</h1>
+                <p class="hero-lead">
+                    A multi-stage pipeline designed to parse claims, interrogate independent knowledge bases,
+                    audit media compression, and construct an evidence-grounded report.
+                </p>
+            </div>
+
+            <!-- Timeline of Stages -->
+            <div class="truth-card p-4 p-md-5 mb-5 shadow-lg">
+                <!-- Stage 1 -->
+                <div class="d-flex gap-4 mb-5">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-primary bg-opacity-25 border border-info text-info fw-bold d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                            1
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-white fw-bold mb-2">Claim Ingestion & Linguistic Parsing</h4>
+                        <p class="text-secondary mb-2" style="line-height: 1.7;">
+                            When a text claim is submitted, the natural language engine performs tokenization, removes non-informational stopwords,
+                            and isolates core factual propositions (e.g. subject, predicate, claimed action, dates, numerical values).
+                        </p>
+                        <ul class="text-secondary small mb-0 ps-3">
+                            <li><strong>Sensationalism Scan:</strong> Evaluates capitalization ratios and sensationalist markers designed to manipulate emotional reactions.</li>
+                            <li><strong>Entity Extraction:</strong> Identifies institutions, public figures, geographic entities, and referenced dates.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Stage 2 -->
+                <div class="d-flex gap-4 mb-5">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-primary bg-opacity-25 border border-info text-info fw-bold d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                            2
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-white fw-bold mb-2">Multi-Source Evidence Retrieval</h4>
+                        <p class="text-secondary mb-2" style="line-height: 1.7;">
+                            Rather than trusting a single data source, TRUTH AI queries independent evidence providers simultaneously via its modular adapter interface:
+                        </p>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <div class="p-2 rounded bg-dark border border-secondary border-opacity-25 small text-secondary">
+                                    <strong class="text-info">Google Fact Check:</strong> ClaimReview schema from certified IFCN fact-checkers.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-2 rounded bg-dark border border-secondary border-opacity-25 small text-secondary">
+                                    <strong class="text-info">DuckDuckGo:</strong> Real-time public web indexing and news abstracts.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-2 rounded bg-dark border border-secondary border-opacity-25 small text-secondary">
+                                    <strong class="text-info">Wikipedia Reference:</strong> Established historical, scientific, and encyclopedic consensus.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-2 rounded bg-dark border border-secondary border-opacity-25 small text-secondary">
+                                    <strong class="text-info">Curated Ground Truth:</strong> Peer-reviewed database for contemporary scientific consensus.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage 3 -->
+                <div class="d-flex gap-4 mb-5">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-primary bg-opacity-25 border border-info text-info fw-bold d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                            3
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-white fw-bold mb-2">Stance Alignment & Contradiction Detection</h4>
+                        <p class="text-secondary mb-2" style="line-height: 1.7;">
+                            Each retrieved citation is classified into one of four stance relationships relative to the submitted claim:
+                        </p>
+                        <div class="vstack gap-2 mb-0">
+                            <span class="small text-secondary"><strong class="text-success"><i class="fa-solid fa-circle-check me-1"></i> Supporting:</strong> Corroborates the event, statistics, and causal claims.</span>
+                            <span class="small text-secondary"><strong class="text-danger"><i class="fa-solid fa-circle-xmark me-1"></i> Contradicting:</strong> Authoritative reporting directly disputes or debunks the assertion.</span>
+                            <span class="small text-secondary"><strong class="text-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i> Misleading / Missing Context:</strong> True premise combined with distorted framing or omitted baseline data.</span>
+                            <span class="small text-secondary"><strong class="text-info"><i class="fa-solid fa-circle-question me-1"></i> Contextual / Neutral:</strong> Related background reporting that neither confirms nor denies the core assertion.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage 4 -->
+                <div class="d-flex gap-4 mb-5">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-primary bg-opacity-25 border border-info text-info fw-bold d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                            4
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-white fw-bold mb-2">Optical & Forensic Media Processing</h4>
+                        <p class="text-secondary mb-2" style="line-height: 1.7;">
+                            For photograph and video uploads, specialized computer vision routines audit visual integrity:
+                        </p>
+                        <ul class="text-secondary small mb-0 ps-3">
+                            <li><strong>Error Level Analysis (ELA):</strong> Re-compresses the image at 90% JPEG quality to highlight digital splicing and composited elements.</li>
+                            <li><strong>Metadata & EXIF Audit:</strong> Extracts camera hardware sensor tags and flags the presence of editing software (e.g. Photoshop, GIMP).</li>
+                            <li><strong>AI Synthesis Detection:</strong> Analyzes diffusion generator prompt signatures (Stable Diffusion, Midjourney) and frequency-domain spectral characteristics.</li>
+                            <li><strong>Keyframe Temporal Video Audit:</strong> Evaluates inter-frame focal sharpness and lighting stability across OpenCV-extracted frames.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Stage 5 -->
+                <div class="d-flex gap-4">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-primary bg-opacity-25 border border-info text-info fw-bold d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                            5
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-white fw-bold mb-2">Explainable Synthesis & Limitations Disclosure</h4>
+                        <p class="text-secondary mb-0" style="line-height: 1.7;">
+                            The engine compiles the final verdict, confidence score, and clear narrative explanation.
+                            Every report explicitly lists methodologic limitations, reminding the user that automated systems are tools
+                            to assist human inquiry, not infallible arbiters of truth.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="text-center">
+                <a href="{{ url_for('views.news') }}" class="btn btn-truth-primary me-2">
+                    <i class="fa-solid fa-bolt me-1"></i> Try News Verifier
+                </a>
+                <a href="{{ url_for('views.image') }}" class="btn btn-truth-outline">
+                    <i class="fa-regular fa-image me-1"></i> Try Image Forensics
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

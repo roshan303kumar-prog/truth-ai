@@ -1,0 +1,20 @@
+runtime: python312
+instance_class: F2
+
+entrypoint: gunicorn --bind :$PORT --workers 2 --threads 4 --timeout 120 app:app
+
+env_variables:
+  SECRET_KEY: "truth-ai-production-session-key-2026"
+  DUCKDUCKGO_ENABLED: "True"
+  WIKIPEDIA_ENABLED: "True"
+  OFFLINE_FALLBACK_ENABLED: "True"
+  ELA_QUALITY: "90"
+  ELA_SCALE: "15"
+  MAX_VIDEO_FRAMES: "12"
+
+handlers:
+  - url: /static
+    static_dir: static
+
+  - url: /.*
+    script: auto

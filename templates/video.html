@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Video Analysis & Deepfake Inspection — TRUTH AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <span class="hero-pill mb-2"><i class="fa-solid fa-film"></i> Multi-Frame Temporal Video Inspection</span>
+                <h1 class="fw-bold mb-2">Video Verification & Media Forensics</h1>
+                <p class="text-secondary">
+                    Deconstructs video footage into uniform temporal keyframes to audit lighting stability,
+                    focal sharpness, on-screen chyrons, and synthetic neural generation patterns.
+                </p>
+            </div>
+
+            <!-- Upload Card -->
+            <div class="truth-card mb-4 shadow-lg">
+                <div id="video-dropzone" class="truth-dropzone mb-3">
+                    <i class="fa-solid fa-video dropzone-icon"></i>
+                    <h5 class="text-white mb-1">Drag & Drop Video Here or Click to Browse</h5>
+                    <p class="text-secondary small mb-0">Supports MP4, WEBM, AVI, and MOV containers (Max 50 MB)</p>
+                    <input type="file" id="video-file-input" accept=".mp4,.webm,.avi,.mov" style="display: none;">
+                </div>
+
+                <!-- Preview Area -->
+                <div id="video-preview-container" class="p-3 rounded bg-dark border border-secondary border-opacity-25 mb-3" style="display: none;">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-5">
+                            <video id="video-player" controls class="w-100 rounded border border-secondary" style="max-height: 180px; background: #000;"></video>
+                        </div>
+                        <div class="col-md-7">
+                            <h6 id="video-preview-filename" class="text-white mb-1 text-truncate">video.mp4</h6>
+                            <span id="video-preview-filesize" class="badge bg-secondary bg-opacity-25 text-info mb-3">0 MB</span>
+                            <div>
+                                <button type="button" id="video-verify-btn" class="btn btn-truth-primary" disabled>
+                                    <i class="fa-solid fa-film me-1"></i> Run Multi-Frame Analysis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Progress Overlay -->
+            <div id="video-analysis-progress" class="truth-card analysis-progress-overlay mb-4">
+                <div class="analysis-spinner"></div>
+                <h4 class="text-white fw-bold mb-2">Analyzing Video Footage Across Keyframes</h4>
+                <p class="text-secondary small">Decompressing frames and computing optical motion continuity...</p>
+                
+                <ul class="progress-steps-list">
+                    <li class="progress-step-item active" id="vid-step-1">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Extracting representative keyframes using OpenCV
+                    </li>
+                    <li class="progress-step-item" id="vid-step-2">
+                        <i class="fa-solid fa-circle-notch"></i> Analyzing intra-frame sharpness and Laplacian focal variance
+                    </li>
+                    <li class="progress-step-item" id="vid-step-3">
+                        <i class="fa-solid fa-circle-notch"></i> Auditing cross-frame lighting consistency & jump cuts
+                    </li>
+                    <li class="progress-step-item" id="vid-step-4">
+                        <i class="fa-solid fa-circle-notch"></i> Inspecting chyrons via OCR & audio stream parameters
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Result Card -->
+            <div id="video-result-container" class="truth-card mb-4" style="display: none;">
+                <!-- Header / Verdict Bar -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25 gap-3">
+                    <div>
+                        <span class="text-secondary small text-uppercase d-block mb-1">Verification Assessment & Modality</span>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <div id="vid-verdict-badge" class="verdict-badge">
+                                <i id="vid-verdict-icon" class="fa-solid fa-circle-info"></i>
+                                <span id="vid-verdict-text">Processing...</span>
+                            </div>
+                            <span id="vid-detected-type" class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-50 py-2 px-3" style="font-size: 0.9rem;">
+                                <i class="fa-solid fa-layer-group me-1"></i> Detecting Modality...
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="text-secondary small d-block">Confidence Level</span>
+                        <span id="vid-confidence-score" class="fs-4 fw-bold text-white">0%</span>
+                    </div>
+                </div>
+
+                <!-- Confidence Bar -->
+                <div class="confidence-meter-container mb-4">
+                    <div id="vid-confidence-bar" class="confidence-meter-bar" style="width: 0%;"></div>
+                </div>
+
+                <!-- Explanation -->
+                <div class="p-3 mb-4 rounded bg-dark border border-secondary border-opacity-25">
+                    <h6 class="text-info fw-bold mb-2">
+                        <i class="fa-solid fa-brain me-1"></i> Multi-Frame Evidence Explanation
+                    </h6>
+                    <p id="vid-explanation-text" class="text-white mb-0"></p>
+                </div>
+
+                <!-- Properties & Temporal Consistency Grid -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100">
+                            <h6 class="card-title-glow text-white">
+                                <i class="fa-solid fa-sliders text-info"></i> Video Stream Properties
+                            </h6>
+                            <table class="table table-dark table-sm table-borderless text-secondary mb-0">
+                                <tbody id="vid-props-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="truth-card p-3 h-100">
+                            <h6 class="card-title-glow text-white">
+                                <i class="fa-solid fa-chart-line text-info"></i> Temporal Consistency Audit
+                            </h6>
+                            <ul id="vid-anomalies-list" class="list-unstyled mb-0"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Extracted Keyframe Gallery -->
+                <div class="mb-4">
+                    <h6 class="text-white fw-bold mb-1">
+                        <i class="fa-solid fa-images text-info me-1"></i> Sampled Keyframe Sequence
+                    </h6>
+                    <small class="text-secondary d-block mb-2">Representative frames extracted across playback duration:</small>
+                    <div id="vid-frame-gallery" class="frame-gallery"></div>
+                </div>
+
+                <!-- OCR On-Screen Text & Audio Status -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-secondary border-opacity-25 h-100">
+                            <h6 class="text-white fw-bold mb-2">
+                                <i class="fa-solid fa-closed-captioning text-info me-1"></i> On-Screen Chyrons & Banners
+                            </h6>
+                            <ul id="vid-ocr-list" class="list-unstyled text-secondary small mb-0"></ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-secondary border-opacity-25 h-100">
+                            <h6 class="text-white fw-bold mb-2">
+                                <i class="fa-solid fa-waveform text-info me-1"></i> Audio Track Status
+                            </h6>
+                            <p id="vid-audio-transcript" class="text-secondary small mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Limitations Notice -->
+                <div class="truth-alert alert-limitations mb-4">
+                    <h6 class="fw-bold mb-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> Fundamental Verification Rule</h6>
+                    <p class="small mb-0">
+                        TRUTH AI never classifies a video as authentic or fake based on a single frame.
+                        Optical transitions, compression artifacting from platforms like TikTok/WhatsApp, and real-world lighting changes
+                        must be evaluated alongside corroborating news reporting.
+                    </p>
+                </div>
+
+                <!-- Action Toolbar -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top border-secondary border-opacity-25">
+                    <a id="vid-full-report-link" href="#" class="btn btn-truth-outline btn-sm">
+                        <i class="fa-solid fa-file-lines me-1"></i> View Full Printable Report
+                    </a>
+                    <button type="button" class="btn btn-truth-outline btn-sm" onclick="copyShareLink()">
+                        <i class="fa-solid fa-share-nodes me-1"></i> Share Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/video.js') }}"></script>
+{% endblock %}

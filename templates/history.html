@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Verification History Log — TRUTH AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h1 class="fw-bold mb-1">Verification History Log</h1>
+            <p class="text-secondary small mb-0">Browse and inspect previously analyzed claims, images, and video media.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('views.news') }}" class="btn btn-truth-primary btn-sm">
+                <i class="fa-solid fa-plus me-1"></i> New Verification
+            </a>
+        </div>
+    </div>
+
+    <!-- Modality Filter Tabs -->
+    <div class="truth-card p-3 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <ul class="nav nav-pills gap-2 mb-0">
+                <li class="nav-item">
+                    <a class="nav-link {% if not selected_type %}active bg-primary{% else %}text-secondary{% endif %}" href="{{ url_for('views.history') }}">
+                        All Verifications
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if selected_type == 'news' %}active bg-primary{% else %}text-secondary{% endif %}" href="{{ url_for('views.history', type='news') }}">
+                        <i class="fa-regular fa-newspaper me-1"></i> News & Claims
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if selected_type == 'image' %}active bg-primary{% else %}text-secondary{% endif %}" href="{{ url_for('views.history', type='image') }}">
+                        <i class="fa-regular fa-image me-1"></i> Photos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if selected_type == 'video' %}active bg-primary{% else %}text-secondary{% endif %}" href="{{ url_for('views.history', type='video') }}">
+                        <i class="fa-solid fa-film me-1"></i> Videos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if selected_type == 'link' %}active bg-primary{% else %}text-secondary{% endif %}" href="{{ url_for('views.history', type='link') }}">
+                        <i class="fa-solid fa-link me-1"></i> Links
+                    </a>
+                </li>
+            </ul>
+
+            <div class="text-secondary small">
+                Showing <strong>{{ reports|length }}</strong> record{{ 's' if reports|length != 1 else '' }}
+            </div>
+        </div>
+    </div>
+
+    <!-- History Table Card -->
+    <div class="truth-card p-0 overflow-hidden shadow-lg">
+        {% if reports %}
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                <thead class="border-bottom border-secondary border-opacity-25 small text-uppercase text-secondary">
+                    <tr>
+                        <th class="ps-4 py-3">Type</th>
+                        <th class="py-3">Claim / Media Title</th>
+                        <th class="py-3">Verdict</th>
+                        <th class="py-3">Confidence</th>
+                        <th class="py-3">Timestamp</th>
+                        <th class="text-end pe-4 py-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for r in reports %}
+                    <tr id="report-row-{{ r.id }}" class="border-bottom border-secondary border-opacity-10">
+                        <td class="ps-4">
+                            {% if r.verification_type == 'news' %}
+                                <span class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25"><i class="fa-regular fa-newspaper me-1"></i> News</span>
+                            {% elif r.verification_type == 'image' %}
+                                <span class="badge bg-cyan bg-opacity-25 text-white border border-cyan border-opacity-25"><i class="fa-regular fa-image me-1"></i> Photo</span>
+                            {% else %}
+                                <span class="badge bg-indigo bg-opacity-25 text-white border border-indigo border-opacity-25"><i class="fa-solid fa-film me-1"></i> Video</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('views.report_detail', report_id=r.id) }}" class="text-white fw-medium text-decoration-none d-block text-truncate" style="max-width: 380px;" title="{{ r.title_or_claim }}">
+                                {{ r.title_or_claim }}
+                            </a>
+                        </td>
+                        <td>
+                            {% set meta = get_verdict_meta(r.verdict) %}
+                            <span class="verdict-badge {{ meta.badge_class }} py-1 px-2 small">
+                                <i class="fa-solid {{ meta.icon }} me-1"></i> {{ r.verdict }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="small text-white fw-bold">{{ r.confidence_score|round|int }}%</span>
+                                <div class="progress flex-grow-1" style="height: 6px; width: 60px; background: rgba(255,255,255,0.1);">
+                                    <div class="progress-bar {% if r.confidence_score >= 75 %}bg-success{% elif r.confidence_score >= 50 %}bg-warning{% else %}bg-info{% endif %}" style="width: {{ r.confidence_score }}%;"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="small text-secondary">
+                            {{ r.created_at|timeago }}
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('views.report_detail', report_id=r.id) }}" class="btn btn-truth-outline py-1 px-2" title="View Full Report">
+                                    <i class="fa-solid fa-file-lines text-info"></i>
+                                </a>
+                                {% if current_user.is_authenticated and r.user_id == current_user.id %}
+                                <button type="button" class="btn btn-truth-outline py-1 px-2 {% if r.is_saved %}text-warning{% endif %}" onclick="toggleBookmark({{ r.id }}, this)" title="Bookmark Report">
+                                    <i class="{% if r.is_saved %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
+                                </button>
+                                <button type="button" class="btn btn-truth-outline py-1 px-2 text-danger" onclick="deleteReport({{ r.id }})" title="Delete Report">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fa-solid fa-folder-open text-secondary fs-1 mb-3"></i>
+            <h5 class="text-white">No Verification Records Found</h5>
+            <p class="text-secondary small mb-4">You have not submitted any claims or media under this filter yet.</p>
+            <a href="{{ url_for('views.news') }}" class="btn btn-truth-primary btn-sm">
+                <i class="fa-solid fa-bolt-lightning me-1"></i> Start First Verification
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

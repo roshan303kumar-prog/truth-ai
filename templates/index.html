@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}TRUTH AI — Verify. Analyze. Trust. | Fake News & Media Detection{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="container">
+        <div class="hero-pill mx-auto">
+            <i class="fa-solid fa-atom"></i> Next-Gen Verification Intelligence
+        </div>
+        <h1 class="hero-title text-gradient">
+            Verify. Analyze. Trust.
+        </h1>
+        <p class="hero-lead">
+            Combat digital disinformation with multi-source evidence triangulation,
+            optical forensics, and explainable AI. TRUTH AI uncovers facts, detects manipulation, and highlights uncertainty.
+        </p>
+
+        <!-- Quick Verification Box -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8">
+                <div class="truth-card p-3 shadow-lg">
+                    <form action="{{ url_for('views.news') }}" method="GET" class="d-flex flex-column flex-md-row gap-2">
+                        <div class="position-relative flex-grow-1">
+                            <i class="fa-solid fa-magnifying-glass position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"></i>
+                            <input type="text" name="claim" class="truth-input ps-5" placeholder="Paste a headline, statement, or viral claim to verify..." required>
+                        </div>
+                        <button type="submit" class="btn btn-truth-primary text-nowrap">
+                            <i class="fa-solid fa-bolt-lightning me-1"></i> Verify Claim
+                        </button>
+                    </form>
+                    <div class="d-flex justify-content-center gap-4 mt-3 small text-secondary">
+                        <a href="{{ url_for('views.news') }}" class="text-secondary"><i class="fa-regular fa-newspaper text-info me-1"></i> News & Claims</a>
+                        <a href="{{ url_for('views.image') }}" class="text-secondary"><i class="fa-regular fa-image text-info me-1"></i> Photo Forensics</a>
+                        <a href="{{ url_for('views.video') }}" class="text-secondary"><i class="fa-solid fa-film text-info me-1"></i> Video Keyframes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Counters -->
+        <div class="row g-4 text-center justify-content-center">
+            <div class="col-md-3 col-6">
+                <div class="truth-card py-3">
+                    <h3 class="text-info fw-bold mb-0">5</h3>
+                    <small class="text-secondary text-uppercase tracking-wider">Verdict Categories</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="truth-card py-3">
+                    <h3 class="text-white fw-bold mb-0">3-Layer</h3>
+                    <small class="text-secondary text-uppercase tracking-wider">Media Forensics</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="truth-card py-3">
+                    <h3 class="text-info fw-bold mb-0">100%</h3>
+                    <small class="text-secondary text-uppercase tracking-wider">Evidence Grounded</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="truth-card py-3">
+                    <h3 class="text-white fw-bold mb-0">Zero</h3>
+                    <small class="text-secondary text-uppercase tracking-wider">Invented Sources</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Verification Modalities -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold mb-2">Comprehensive Verification Architecture</h2>
+            <p class="text-secondary">Designed to evaluate text claims, photographs, and video clips with scientific rigor.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- News Verification -->
+            <div class="col-lg-4 col-md-6">
+                <div class="truth-card h-100 d-flex flex-column">
+                    <div class="mb-3 text-info fs-2">
+                        <i class="fa-regular fa-newspaper"></i>
+                    </div>
+                    <h4 class="mb-2">News & Claim Engine</h4>
+                    <p class="text-secondary flex-grow-1">
+                        Synthesizes natural language claims against independent fact-checking databases, news archives, and knowledge graphs.
+                        Classifies corroborating and contradicting stances with source citations.
+                    </p>
+                    <ul class="list-unstyled text-secondary small mb-4">
+                        <li><i class="fa-solid fa-check text-info me-2"></i>Multi-source evidence search</li>
+                        <li><i class="fa-solid fa-check text-info me-2"></i>Stance classification (supports/refutes)</li>
+                        <li><i class="fa-solid fa-check text-info me-2"></i>Sensationalism & clickbait analysis</li>
+                    </ul>
+                    <a href="{{ url_for('views.news') }}" class="btn btn-truth-outline w-100">
+                        Launch News Verifier <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Image Verification -->
+            <div class="col-lg-4 col-md-6">
+                <div class="truth-card h-100 d-flex flex-column">
+                    <div class="mb-3 text-info fs-2">
+                        <i class="fa-regular fa-image"></i>
+                    </div>
+                    <h4 class="mb-2">Photo Forensics</h4>
+                    <p class="text-secondary flex-grow-1">
+                        Examines photographs for digital manipulation using Error Level Analysis (ELA), camera hardware metadata auditing,
+                        and frequency-domain synthetic AI generation signatures.
+                    </p>
+                    <ul class="list-unstyled text-secondary small mb-4">
+                        <li><i class="fa-solid fa-check text-info me-2"></i>Error Level Analysis (ELA) heatmap</li>
+                        <li><i class="fa-solid fa-check text-info me-2"></i>EXIF & software editing audit</li>
+                        <li><i class="fa-solid fa-check text-info me-2"></i>AI generation risk evaluation</li>
+                    </ul>
+                    <a href="{{ url_for('views.image') }}" class="btn btn-truth-outline w-100">
+                        Launch Photo Forensics <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Video Verification -->
+            <div class="col-lg-4 col-md-6">
+                <div class="truth-card h-100 d-flex flex-column">
+                    <div class="mb-3 text-info fs-2">
+                        <i class="fa-solid fa-film"></i>
+                    </div>
+                    <h4 class="mb-2">Video Inspection</h4>
+                    <p class="text-secondary flex-grow-1">
+                        Extracts uniform temporal keyframes to audit optical consistency, focal sharpness jumps,
+                        on-screen chyrons via OCR, and potential neural video generation patterns.
+                    </p>
+                    <ul class="list-unstyled text-secondary small mb-4">
+                        <li><i class="fa-solid fa-check text-info me-2"></i>Keyframe extraction via OpenCV</li>
+                        <li><i class="fa-solid fa-check text-info me-2"></i>Temporal lighting stability check</li>
+                        <li><i class="fa-solid fa-check text-info me-2"></i>On-screen chyron & text OCR</li>
+                    </ul>
+                    <a href="{{ url_for('views.video') }}" class="btn btn-truth-outline w-100">
+                        Launch Video Verifier <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Methodological Differentiation -->
+<section class="py-5 bg-black bg-opacity-25 border-top border-bottom border-secondary border-opacity-10">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="badge bg-primary bg-opacity-25 text-info mb-3">Academic Rigor & Ethics</span>
+                <h2 class="fw-bold mb-3">Never Inventing Truth. Acknowledging Uncertainty.</h2>
+                <p class="text-secondary mb-4">
+                    Many commercial tools falsely classify text based on simplistic keyword lists or claim 100% confidence.
+                    TRUTH AI is engineered around sound journalistic epistemics:
+                </p>
+                <div class="d-flex gap-3 mb-3">
+                    <div class="text-info fs-4"><i class="fa-solid fa-scale-balanced"></i></div>
+                    <div>
+                        <h6 class="text-white mb-1">Evidence Over Keywords</h6>
+                        <p class="text-secondary small mb-0">Missing search results never automatically trigger a 'fake' label. The system clearly reports insufficient data.</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-3 mb-3">
+                    <div class="text-info fs-4"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div>
+                        <h6 class="text-white mb-1">Clear Limitations Disclosure</h6>
+                        <p class="text-secondary small mb-0">Every report surfaces potential blindspots, including social media re-compression and breaking event latency.</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-3">
+                    <div class="text-info fs-4"><i class="fa-solid fa-link"></i></div>
+                    <div>
+                        <h6 class="text-white mb-1">Direct Primary Source Links</h6>
+                        <p class="text-secondary small mb-0">Users can click directly into the original reporting to verify claims independently.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="truth-card p-4">
+                    <h5 class="card-title-glow text-white">
+                        <i class="fa-solid fa-list-check text-info"></i> Standard Verification Categories
+                    </h5>
+                    <div class="vstack gap-2">
+                        <div class="p-2 rounded bg-dark border border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                            <span class="badge-supported verdict-badge py-1 px-2 small"><i class="fa-solid fa-circle-check me-1"></i> Supported</span>
+                            <span class="text-secondary small">Corroborated by independent sources</span>
+                        </div>
+                        <div class="p-2 rounded bg-dark border border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                            <span class="badge-false verdict-badge py-1 px-2 small"><i class="fa-solid fa-circle-xmark me-1"></i> Contradicted / False</span>
+                            <span class="text-secondary small">Directly refuted by reliable evidence</span>
+                        </div>
+                        <div class="p-2 rounded bg-dark border border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                            <span class="badge-misleading verdict-badge py-1 px-2 small"><i class="fa-solid fa-triangle-exclamation me-1"></i> Misleading</span>
+                            <span class="text-secondary small">Distorted framing or omitted context</span>
+                        </div>
+                        <div class="p-2 rounded bg-dark border border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                            <span class="badge-unverified verdict-badge py-1 px-2 small"><i class="fa-solid fa-circle-question me-1"></i> Unverified</span>
+                            <span class="text-secondary small">Conflicting or single-source evidence</span>
+                        </div>
+                        <div class="p-2 rounded bg-dark border border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                            <span class="badge-insufficient verdict-badge py-1 px-2 small"><i class="fa-solid fa-circle-info me-1"></i> Insufficient</span>
+                            <span class="text-secondary small">No public documentation available</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Verifications Feed -->
+{% if recent_checks %}
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Recent Public Verifications</h3>
+                <p class="text-secondary small mb-0">Live audit stream of claims evaluated by the TRUTH AI engine.</p>
+            </div>
+            <a href="{{ url_for('views.history') }}" class="btn btn-truth-outline btn-sm">
+                View Complete Log <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-3">
+            {% for report in recent_checks %}
+            <div class="col-md-6 col-lg-3">
+                <div class="truth-card h-100 p-3 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-secondary bg-opacity-25 text-white small text-uppercase">
+                            {{ report.verification_type }}
+                        </span>
+                        <small class="text-secondary">{{ report.created_at|timeago }}</small>
+                    </div>
+                    <h6 class="text-white text-truncate mb-2" title="{{ report.title_or_claim }}">
+                        {{ report.title_or_claim }}
+                    </h6>
+                    {% set meta = get_verdict_meta(report.verdict) %}
+                    <div class="mb-3">
+                        <span class="verdict-badge {{ meta.badge_class }} small py-1 px-2">
+                            <i class="fa-solid {{ meta.icon }} me-1"></i> {{ report.verdict }}
+                        </span>
+                    </div>
+                    <div class="mt-auto d-flex justify-content-between align-items-center">
+                        <span class="small text-secondary">Confidence: <strong>{{ report.confidence_score|round|int }}%</strong></span>
+                        <a href="{{ url_for('views.report_detail', report_id=report.id) }}" class="btn btn-sm btn-truth-outline py-0 px-2">
+                            Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- User Community Reviews & Testimonials -->
+{% if featured_reviews %}
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <span class="hero-pill mb-2"><i class="fa-solid fa-star text-warning"></i> User Testimonials</span>
+                <h3 class="fw-bold mb-1">What Our Community Says</h3>
+                <p class="text-secondary small mb-0">Feedback from fact-checkers, students, journalists & everyday users.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('views.reviews') }}" class="btn btn-truth-outline btn-sm">
+                    View All Reviews ({{ total_reviews }}) <i class="fa-solid fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for r in featured_reviews %}
+            <div class="col-md-4">
+                <div class="truth-card h-100 p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="user-avatar-initials">
+                                {{ r.user_name[:2].upper() }}
+                            </div>
+                            <div>
+                                <h6 class="text-white fw-bold mb-0">{{ r.user_name }}</h6>
+                                <span class="badge bg-secondary bg-opacity-25 text-info small" style="font-size: 0.7rem;">
+                                    {{ r.user_role or 'Verified User' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="text-warning small">
+                            {% for i in range(1, 6) %}
+                                {% if i <= r.rating %}
+                                    <i class="fa-solid fa-star"></i>
+                                {% else %}
+                                    <i class="fa-regular fa-star text-secondary"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <h6 class="text-white fw-semibold mb-2">{{ r.title }}</h6>
+                    <p class="text-secondary small mb-0 flex-grow-1" style="line-height: 1.6;">
+                        "{{ r.review_text }}"
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Bottom CTA -->
+<section class="py-5 text-center">
+    <div class="container">
+        <div class="truth-card p-5 max-w-700 mx-auto">
+            <h2 class="fw-bold mb-3">Empower Your Critical Information Literacy</h2>
+            <p class="text-secondary mb-4">
+                Create a free account to maintain a personal verification dashboard, bookmark investigative reports, and track disinformation trends.
+            </p>
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-truth-primary me-2">
+                    <i class="fa-solid fa-user-plus me-1"></i> Get Started Free
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-truth-outline">
+                    Sign In
+                </a>
+            {% else %}
+                <a href="{{ url_for('views.dashboard') }}" class="btn btn-truth-primary">
+                    <i class="fa-solid fa-chart-line me-1"></i> Open Your Dashboard
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
