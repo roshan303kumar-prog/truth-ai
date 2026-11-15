@@ -150,14 +150,24 @@ class ContentLinkVerifier:
             if not video_id and "/shorts/" in parsed.path:
                 video_id = parsed.path.split("/shorts/")[1].split("/")[0].split("?")[0]
 
+        # Check if user submitted a YouTube Search Page instead of a video
+        is_search_page = False
+        search_query = ""
+        if "/results" in parsed.path:
+            is_search_page = True
+            qs = urllib.parse.parse_qs(parsed.query)
+            search_query = qs.get("search_query", [""])[0]
+
         video_info = {
             "type": "video",
             "platform": "YouTube",
             "video_id": video_id,
-            "title": "",
-            "author": "YouTube Creator",
+            "is_search_page": is_search_page,
+            "search_query": search_query,
+            "title": f"YouTube Search: '{search_query}'" if is_search_page and search_query else "",
+            "author": "YouTube Platform" if is_search_page else "YouTube Creator",
             "thumbnail_url": f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg" if video_id else "",
-            "description": "",
+            "description": f"YouTube search results page for '{search_query}'." if is_search_page else "",
             "source_domain": "youtube.com",
         }
 
@@ -331,6 +341,41 @@ class ContentLinkVerifier:
             content_summary = content_data.get("description", "")
             publisher_name = content_data.get("author", "YouTube Channel")
             content_type_label = "Online Video"
+
+            # If user submitted a search query page instead of an individual video
+            if content_data.get("is_search_page"):
+                sq = content_data.get("search_query", "")
+                summary_statement = (
+                    f"This link is a YouTube Search query page ('{sq or 'news'}'), not a specific video. "
+                    "To fact-check a news story, please open the specific video and copy its direct URL."
+                )
+                key_findings = [
+                    f"Input Detected: YouTube Search Page for '{sq or 'news'}' (Contains a list of search results).",
+                    "How to check: Please open and play the specific video, click 'Share' -> 'Copy Link', and paste it here.",
+                ]
+                return {
+                    "success": True,
+                    "url": normalized_url,
+                    "host": host,
+                    "content_type": "YouTube Search Page",
+                    "is_video": True,
+                    "title": f"YouTube Search: '{sq}'" if sq else "YouTube Search Results Page",
+                    "publisher": "YouTube Search",
+                    "thumbnail_url": "",
+                    "summary_snippet": summary_statement,
+                    "verdict": "Unverified / Search Page Link",
+                    "verdict_class": "warning",
+                    "authenticity_score": 50.0,
+                    "confidence_score": 50.0,
+                    "source_trust_score": 60,
+                    "source_badge": "YouTube Search Page",
+                    "explanation": summary_statement,
+                    "key_findings": key_findings,
+                    "supporting_evidence": [],
+                    "contradicting_evidence": [],
+                    "source_links": [],
+                    "linguistics": {"sensationalism_detected": False, "sentiment_tone": "Search Query"},
+                }
         else:
             content_data = self.extract_article_info(normalized_url)
             headline_or_claim = content_data.get("title", "")
