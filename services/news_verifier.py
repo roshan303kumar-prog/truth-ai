@@ -50,7 +50,7 @@ class NewsVerifier:
             "ko", "ka", "ki", "ke", "k", "me", "mein", "par", "pe", "tha", "thi", "the",
             "hai", "hain", "h", "aur", "ne", "se", "ye", "yeh", "wo", "woh", "kadam", "rakha",
             "sach", "hua", "gaya", "karna", "karein", "bhi", "toh", "to", "hi", "wala", "wali", "wale",
-            "kya", "kyun", "kaise", "kab"
+            "kya", "kyun", "kaise", "kab", "charo", "taraf", "lagati", "lagata", "lagate"
         }
         hinglish_map = {
             "chand": "moon",
@@ -63,6 +63,12 @@ class NewsVerifier:
             "tara": "star",
             "tare": "stars",
             "sitaare": "stars",
+            "ghumti": "orbits",
+            "ghumta": "orbits",
+            "ghoomti": "orbits",
+            "ghoomta": "orbits",
+            "chakkar": "orbit",
+            "parikrama": "orbit",
         }
         tokens = re.findall(r"\b[A-Za-z0-9\-]{2,}\b", text.lower())
         return [hinglish_map.get(t, t) for t in tokens if t not in stopwords]
@@ -114,6 +120,19 @@ class NewsVerifier:
         # 2. Check Apollo moon landing entity substitution
         if any(w in claim_lower for w in ["moon landing", "walked on the moon", "apollo 11"]):
             if any(c in claim_lower for c in ["elon musk", "alon mask", "trump", "kubrick staged", "faked in studio"]):
+                return True
+
+        # 3. Check Geocentric vs Heliocentric astronomical orbital inversion
+        # Detect claims asserting the Sun rotates, revolves, or orbits around the Earth
+        sun_match = re.search(r"\b(sun|suraj)\b", claim_lower)
+        earth_match = re.search(r"\b(earth|dharti|prithvi)\b", claim_lower)
+        has_motion = any(w in claim_lower for w in [
+            "rotate", "rotat", "revolv", "orbit", "circle", "circl",
+            "around", "round", "chakkar", "ghoom", "ghum", "gird", "parikrama"
+        ])
+        if sun_match and earth_match and has_motion and (sun_match.start() < earth_match.start()):
+            # Any astronomical evidence discussing Earth, Sun, orbits, heliocentrism, or rotation refutes the Sun-revolves-around-Earth fallacy!
+            if any(term in ev_text for term in ["earth", "sun", "orbit", "rotation", "revolve", "heliocentric", "solar"]):
                 return True
 
         return False

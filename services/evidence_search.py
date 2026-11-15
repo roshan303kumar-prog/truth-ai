@@ -26,7 +26,7 @@ HINGLISH_STOPWORDS = {
     "ko", "ka", "ki", "ke", "k", "me", "mein", "par", "pe", "tha", "thi", "the",
     "hai", "hain", "h", "aur", "ne", "se", "ye", "yeh", "wo", "woh", "kadam", "rakha",
     "sach", "hua", "gaya", "karna", "karein", "bhi", "toh", "to", "hi", "wala", "wali", "wale",
-    "kya", "kyun", "kaise", "kab"
+    "kya", "kyun", "kaise", "kab", "charo", "taraf", "lagati", "lagata", "lagate"
 }
 
 HINGLISH_MAP = {
@@ -40,6 +40,12 @@ HINGLISH_MAP = {
     "tara": "star",
     "tare": "stars",
     "sitaare": "stars",
+    "ghumti": "orbits",
+    "ghumta": "orbits",
+    "ghoomti": "orbits",
+    "ghoomta": "orbits",
+    "chakkar": "orbit",
+    "parikrama": "orbit",
 }
 
 
@@ -183,6 +189,34 @@ OFFLINE_FACT_DATABASE = [
                 "source": "NASA Solar Science",
                 "published_date": "2023-01-01",
                 "rating": "False / Impossible",
+                "stance": "refutes"
+            }
+        ]
+    },
+    {
+        "id": "geocentric_myth",
+        "topic": "Geocentric Model / Sun Revolves Around the Earth Fallacy",
+        "match_type": "astronomical_orbital_fallacy",
+        "claim": "The Sun rotates or revolves around the Earth.",
+        "canonical_verdict": "False or contradicted by reliable evidence",
+        "rating": "Scientifically False / Debunked Fallacy",
+        "evidence": [
+            {
+                "title": "NASA Solar System Science: Heliocentric Planetary Motion",
+                "snippet": "In the heliocentric solar system proven by modern astrophysics, Earth and all planets orbit the Sun. The Sun does NOT rotate or revolve around the Earth; the Sun's apparent motion across the sky is an optical effect caused entirely by Earth's rotation on its own axis.",
+                "url": "https://science.nasa.gov/solar-system/",
+                "source": "NASA Solar System Science",
+                "published_date": "2023-01-01",
+                "rating": "Scientifically False",
+                "stance": "refutes"
+            },
+            {
+                "title": "Encyclopaedia Britannica: Geocentric vs Heliocentric Model",
+                "snippet": "The geocentric model (claiming the Sun revolves around the Earth) was disproved centuries ago by Nicolaus Copernicus and Galileo Galilei. Gravitational physics and orbital mechanics definitively confirm that Earth orbits the Sun, not the reverse.",
+                "url": "https://www.britannica.com/science/geocentric-model",
+                "source": "Encyclopaedia Britannica",
+                "published_date": "2023-05-15",
+                "rating": "Debunked Fallacy",
                 "stance": "refutes"
             }
         ]
@@ -576,6 +610,29 @@ class EvidenceAggregator:
                                 rating=ev.get("rating"),
                                 stance=ev.get("stance", "refutes"),
                                 relevance_score=0.96,
+                            )
+                            if item.url not in seen_urls:
+                                seen_urls.add(item.url)
+                                results.insert(0, item)
+
+                elif mtype == "astronomical_orbital_fallacy":
+                    sun_match = re.search(r"\b(sun|suraj)\b", claim_lower)
+                    earth_match = re.search(r"\b(earth|dharti|prithvi)\b", claim_lower)
+                    has_motion = any(w in claim_lower for w in [
+                        "rotate", "rotat", "revolv", "orbit", "circle", "circl",
+                        "around", "round", "chakkar", "ghoom", "ghum", "gird", "parikrama"
+                    ])
+                    if sun_match and earth_match and has_motion and (sun_match.start() < earth_match.start()):
+                        for ev in entry.get("evidence", []):
+                            item = EvidenceItem(
+                                title=ev["title"],
+                                snippet=ev["snippet"],
+                                url=ev["url"],
+                                source=ev["source"],
+                                published_date=ev.get("published_date"),
+                                rating=ev.get("rating"),
+                                stance=ev.get("stance", "refutes"),
+                                relevance_score=0.98,
                             )
                             if item.url not in seen_urls:
                                 seen_urls.add(item.url)
