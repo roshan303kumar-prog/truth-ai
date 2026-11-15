@@ -444,7 +444,7 @@ class WikipediaSearchAdapter(BaseSearchAdapter):
                 results = data.get("query", {}).get("search", [])
                 for r in results:
                     title = r.get("title", "")
-                    clean_snippet = BeautifulSoup(r.get("snippet", ""), "html.parser").get_text(strip=True)
+                    clean_snippet = BeautifulSoup(r.get("snippet", ""), "html.parser").get_text(separator=" ", strip=True)
                     url = f"https://en.wikipedia.org/wiki/{urllib.parse.quote(title.replace(' ', '_'))}"
                     items.append(
                         EvidenceItem(

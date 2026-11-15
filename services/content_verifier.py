@@ -163,8 +163,29 @@ class ContentLinkVerifier:
         lower = url.lower()
         return any(v in lower for v in ["youtube.com", "youtu.be", "vimeo.com", "dailymotion.com", "/video/", "/watch?v="])
 
+    def clean_video_claim_for_search(self, raw_title: str) -> str:
+        """
+        Strips YouTube channel tags, hashtags, broadcast prefixes, and emojis
+        to extract the pure factual claim text for high-precision search query matching.
+        """
+        if not raw_title:
+            return ""
+        clean = raw_title.strip()
+        # Remove hashtags like #shorts, #breakingnews
+        clean = re.sub(r"#\w+", "", clean)
+        # Remove channel suffixes like | N18G, | Manak Gupta, // News24, - Times Now
+        clean = re.sub(r"\s*[\|\/]\s*.*$", "", clean)
+        clean = re.sub(r"\s*-\s*(youtube|news24|firstpost|ndtv|aaj tak|shorts).*$", "", clean, flags=re.IGNORECASE)
+        # Remove editorial show prefixes
+        clean = re.sub(r"^(rashtra ki baat|dangal|dna|master stroke|special report)\s*[:|-]\s*", "", clean, flags=re.IGNORECASE)
+        # Remove sensational lead-in prefixes
+        clean = re.sub(r"^(breaking news|breaking|exclusive|shocking|watch|just in|live)\s*[:|-]\s*", "", clean, flags=re.IGNORECASE)
+        # Strip quotes
+        clean = clean.replace('"', '').replace("'", "").strip()
+        return clean
+
     def extract_youtube_info(self, url: str) -> Dict[str, Any]:
-        """Extract video metadata from YouTube URL using official oEmbed API and URL regex."""
+        """Extract video metadata from YouTube URL using official oEmbed API and video page scraping."""
         parsed = urllib.parse.urlparse(url if url.startswith("http") else f"https://{url}")
         video_id = ""
 
@@ -211,6 +232,24 @@ class ContentLinkVerifier:
                 video_info["thumbnail_url"] = data.get("thumbnail_url", video_info["thumbnail_url"])
         except Exception:
             pass
+
+        # Also fetch video page description from HTML if video_id is present
+        if video_id and not is_search_page:
+            try:
+                page_url = f"https://www.youtube.com/watch?v={video_id}"
+                page_resp = self.session.get(page_url, timeout=5)
+                if page_resp.status_code == 200:
+                    page_html = page_resp.text
+                    desc_match = re.search(r'"shortDescription":"(.*?)"', page_html)
+                    if desc_match:
+                        raw_desc = desc_match.group(1).encode("utf-8").decode("unicode_escape", errors="ignore")
+                        video_info["description"] = raw_desc[:500]
+                    elif not video_info.get("description"):
+                        meta_desc = re.search(r'<meta name="description" content="(.*?)">', page_html)
+                        if meta_desc:
+                            video_info["description"] = meta_desc.group(1)[:500]
+            except Exception:
+                pass
 
         # Fallback title if oEmbed is offline or private
         if not video_info["title"] and video_id:
@@ -451,9 +490,14 @@ class ContentLinkVerifier:
                 source_category = "Humor / Disinformation"
                 break
 
-        # 3. Linguistic, Clickbait & Editorial Format Analysis
-        combined_text = f"{headline_or_claim} {content_summary}".strip()
-        linguistics = self.news_verifier.analyze_linguistics(combined_text)
+        # 3. Clean Title & Linguistic, Clickbait & Editorial Format Analysis
+        if is_video:
+            cleaned_claim = self.clean_video_claim_for_search(headline_or_claim)
+        else:
+            cleaned_claim = headline_or_claim
+
+        combined_text = f"{cleaned_claim} {content_summary}".strip()
+        linguistics = self.news_verifier.analyze_linguistics(f"{headline_or_claim} {content_summary}".strip())
 
         # Detect Journalistic Debate / Opinion Question format vs Statement
         is_debate_or_question = bool(re.search(r"(\?|क्या\s|kya\s|\bdebate\b|\brashtra ki baat\b|\bdna\b|\bdangal\b|\bmaster stroke\b)", headline_or_claim, re.IGNORECASE))
@@ -463,7 +507,7 @@ class ContentLinkVerifier:
             source_badge = "Sensational / Potential Clickbait Video"
 
         # 4. Fact-Checking Claim through NewsVerifier & Evidence Search
-        eval_claim = headline_or_claim if len(headline_or_claim) > 10 else combined_text
+        eval_claim = cleaned_claim if len(cleaned_claim) >= 8 else (headline_or_claim if len(headline_or_claim) > 10 else combined_text)
         fact_check_result = self.news_verifier.verify_claim(eval_claim)
 
         # 5. Composite Dynamic Authenticity Calculation
@@ -474,11 +518,12 @@ class ContentLinkVerifier:
         num_support = len(fact_check_result.get("supporting_evidence", []))
         num_contra = len(fact_check_result.get("contradicting_evidence", []))
 
-        # Check for extreme war / military conflict assertions
+        # Check for extreme uncorroborated war / direct capital attack assertions
         WAR_OR_EXTREME_CLAIM_PATTERNS = [
-            r"\b(war|counter attack|nuclear strike|world war|ww3|operation sindoor)\b",
-            r"\b(attack on islamabad|strike on lahore|delhi par hamla|surgical strike)\b",
-            r"(काउंटर\s*अटैक|इस्लामाबाद\s*पर|भारत\s*ने\s*किया\s*हमला|युद्ध|तबाही|एयरस्ट्राइक)",
+            r"\b(nuclear strike|world war 3|ww3|attack on washington|attack on islamabad|strike on lahore|delhi par hamla)\b",
+            r"(islamabad|lahore|delhi|rawalpindi|इस्लामाबाद|लाहौर|दिल्ली).*(काउंटर\s*अटैक|counter attack|strike|attack|हमला)",
+            r"(काउंटर\s*अटैक|counter attack|surgical strike).*(islamabad|lahore|delhi|rawalpindi|इस्लामाबाद|लाहौर|दिल्ली)",
+            r"(परमाणु\s*हमला|तीसरा\s*विश्व\s*युद्ध)",
         ]
         is_extreme_war_claim = any(re.search(pat, headline_or_claim, re.IGNORECASE) for pat in WAR_OR_EXTREME_CLAIM_PATTERNS)
 
@@ -488,13 +533,13 @@ class ContentLinkVerifier:
             verdict_class = "danger"
             summary_statement = f"This content is published by {publisher_name}, a recognized satire or fabricated hoax outlet. The claims are not real news."
         elif is_extreme_war_claim and num_support == 0:
-            final_verdict = "Sensational / Uncorroborated War Claim"
+            final_verdict = "Sensational / Uncorroborated Conflict Claim"
             authenticity_score = 28.0
             verdict_class = "danger"
             summary_statement = (
-                f"Sensationalized war/military claim from {publisher_name}. "
-                "There is NO official confirmation from the Ministry of Defence, PIB, or independent international observers "
-                "confirming any military attack on Islamabad or ongoing war. Often packaged on YouTube Shorts as dramatic clickbait or hypothetical scenario."
+                f"Sensationalized conflict assertion from {publisher_name}. "
+                f"There is NO official confirmation from the Ministry of Defence, PIB, or verified international observers "
+                f"corroborating the assertion '{cleaned_claim[:85]}'. Video titles of this nature are frequently packaged as dramatic clickbait or speculative war scenarios."
             )
         elif matched_source and matched_source["trust"] >= 86 and fc_verdict not in ["False", "Manipulated"]:
             if is_debate_or_question:
@@ -505,11 +550,50 @@ class ContentLinkVerifier:
                     f"Televised journalistic debate/report on {publisher_name} ({matched_source['tier']}). "
                     "The coverage poses editorial debate questions regarding current political affairs on an accredited national broadcast network."
                 )
+            elif num_support > 0:
+                final_verdict = "Verified Authentic / News Coverage"
+                authenticity_score = round(min(max(fc_confidence, float(matched_source["trust"])) + min(num_support * 2.0, 4.0), 95.0), 1)
+                verdict_class = "success"
+                summary_statement = (
+                    f"Reported by {publisher_name} ({matched_source['tier']}). "
+                    "The event is corroborated by historical media coverage and authoritative documentation."
+                )
             else:
                 final_verdict = "Verified Authentic"
-                authenticity_score = round(max(fc_confidence, float(matched_source["trust"])), 1)
+                authenticity_score = round(float(matched_source["trust"]), 1)
                 verdict_class = "success"
-                summary_statement = f"Reported by {publisher_name} ({matched_source['tier']}). The news coverage is supported by corroborated media reports."
+                summary_statement = f"Reported by accredited newsroom {publisher_name} ({matched_source['tier']}). Direct news reporting from an established broadcast organization."
+        elif not matched_source and is_video:
+            # Independent YouTube creator or personal video
+            if fc_verdict in ["False", "Manipulated"] or num_contra > 0:
+                final_verdict = "Debunked / False Claim"
+                authenticity_score = round(min(fc_confidence, 25.0), 1)
+                verdict_class = "danger"
+                summary_statement = f"Fact-checking records and verified sources contradict the assertions made in this video from {publisher_name}."
+            elif num_support > 0:
+                final_verdict = "Verified Factual Video"
+                authenticity_score = round(min(72.0 + (num_support * 6.0), 88.0), 1)
+                verdict_class = "success"
+                summary_statement = f"The claims presented in this video from {publisher_name} are corroborated by independent references and documented sources."
+            elif linguistics.get("sensationalism_detected"):
+                final_verdict = "Sensational / Unverified Creator Video"
+                authenticity_score = 36.0
+                verdict_class = "warning"
+                summary_statement = (
+                    f"This video is published by an independent creator ({publisher_name}) and employs sensational or urgent headline phrasing. "
+                    "No authoritative cross-references were found to substantiate the assertions. Exercise critical caution before sharing."
+                )
+            else:
+                final_verdict = "Unverified Creator Video"
+                dynamic_base = 52.0
+                entity_bonus = min(len(claim_tokens) * 1.5, 8.0)
+                context_bonus = min(total_ev * 2.5, 10.0)
+                authenticity_score = round(min(dynamic_base + entity_bonus + context_bonus, 72.0), 1)
+                verdict_class = "warning"
+                summary_statement = (
+                    f"This content is from independent creator '{publisher_name}' and lacks independent official news verification. "
+                    "Always cross-reference individual social media videos with certified news organizations."
+                )
         elif fc_verdict in ["False", "Manipulated"]:
             final_verdict = "Debunked / False Claim"
             authenticity_score = round(min(fc_confidence, 25.0), 1)

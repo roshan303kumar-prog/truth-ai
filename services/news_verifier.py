@@ -26,7 +26,7 @@ MISLEADING_KEYWORDS = {
 SENSATIONAL_PATTERNS = [
     r"\b(shocking|unbelievable|miracle cure|they don't want you to know|mind-blowing)\b",
     r"\b(secret exposed|you won't believe|hidden truth|100% guaranteed)\b",
-    r"\b(war|counter attack|nuclear strike|world war|ww3|operation sindoor)\b",
+    r"\b(war|counter attack|nuclear strike|world war|ww3)\b",
     r"\b(bada khulasa|hosh ud jayenge|khatra|tabahi machi|dhamaka)\b",
     r"(काउंटर\s*अटैक|हमला|युद्ध|तबाही|बड़ा\s*खुलासा|होश\s*उड़|सनसनीखेज|सर्जिकल\s*स्ट्राइक|इस्लामाबाद\s*पर|लाहौर\s*पर)",
     r"[!?]{2,}",  # Repeated punctuation like ?? or !!
@@ -100,9 +100,11 @@ class NewsVerifier:
 
         # 1. Check telescope and astronomical discovery entity substitution
         if any(w in claim_lower for w in ["telescope", "galaxies", "galaxy", "big bang"]):
+            conflicting = ["alon mask", "elon mask", "elon musk", "musk", "spacex", "trump", "biden", "bill gates"]
+            if any(c in claim_lower for c in conflicting) and not any(jw in claim_lower for jw in ["james webb", "jwst", "hubble"]):
+                return True
             if any(jw in ev_text for jw in ["james webb", "jwst"]):
                 # If claim asserts someone/something else as the space telescope:
-                conflicting = ["alon mask", "elon mask", "elon musk", "musk", "spacex", "trump", "biden", "bill gates"]
                 if any(c in claim_lower for c in conflicting):
                     return True
                 # Or if "space telescope" in claim and "james webb" is not in claim
@@ -167,9 +169,10 @@ class NewsVerifier:
         elif support_hits >= 1 and len(overlap) >= 2:
             return "supports"
 
-        # 7. Check high factual corroboration from authoritative sources (Wikipedia, NASA, Reuters, WHO)
+        # 7. Check high factual corroboration from authoritative sources (Wikipedia, NASA, Reuters, WHO, Press)
         is_authoritative = any(s in (evidence.source or "").lower() for s in ["wikipedia", "nasa", "reuters", "who", "archive", "jpl", "ap news", "official"])
-        if is_authoritative and len(overlap) >= 4 and refute_hits == 0 and not has_negation:
+        min_overlap = 3 if len(claim_tokens) >= 5 else 2
+        if is_authoritative and len(overlap) >= min_overlap and refute_hits == 0 and not has_negation:
             return "supports"
 
         return "neutral"
