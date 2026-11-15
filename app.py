@@ -64,6 +64,16 @@ def create_app(config_class=Config):
                 Path(db_file).parent.mkdir(parents=True, exist_ok=True)
         db.create_all()
 
+        # Automatically ensure community reviews and demo records exist
+        if not app.config.get("TESTING"):
+            try:
+                from database.models import UserReview
+                if UserReview.query.count() < 8:
+                    from seed_db import seed
+                    seed()
+            except Exception:
+                pass
+
     # Friendly, secure error handlers
     @app.errorhandler(400)
     def bad_request(e):

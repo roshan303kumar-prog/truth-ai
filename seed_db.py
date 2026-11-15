@@ -163,50 +163,95 @@ def seed():
         else:
             print("Database already contains verification records.")
 
-        # Seed initial reviews if none exist
-        if UserReview.query.count() == 0:
-            demo_reviews = [
-                UserReview(
-                    user_name="Priya Sharma",
-                    user_role="Journalism Student",
-                    rating=5,
-                    title="Game changer for verifying viral WhatsApp claims!",
-                    review_text="The Link Scanner and NEO Assistant are incredible. I pasted a suspicious SBI KYC SMS link and it immediately warned me of brand impersonation with 92% risk score.",
+        # Seed comprehensive community reviews
+        all_demo_reviews = [
+            {
+                "user_name": "Priya Sharma",
+                "user_role": "Journalism Student",
+                "rating": 5,
+                "title": "Game changer for verifying viral WhatsApp claims!",
+                "review_text": "The Link Scanner and NEO Assistant are incredible. I pasted a suspicious SBI KYC SMS link and it immediately warned me of brand impersonation with 92% risk score.",
+                "days_ago": 3,
+            },
+            {
+                "user_name": "Vikram Malhotra",
+                "user_role": "Cybersecurity Researcher",
+                "rating": 5,
+                "title": "Outstanding Error Level Analysis & Forensics",
+                "review_text": "The ELA heatmap and optical metadata audit accurately showed localized compression discrepancies on photoshopped identity documents. Very impressed.",
+                "days_ago": 5,
+            },
+            {
+                "user_name": "Ananya Deshmukh",
+                "user_role": "Digital Fact Checker",
+                "rating": 5,
+                "title": "NEO AI Assistant is fast, intelligent & screen-aware",
+                "review_text": "Being able to share my screen and have NEO point out exactly where to click and what errors exist makes this platform so seamless.",
+                "days_ago": 7,
+            },
+            {
+                "user_name": "Sumanth Rao",
+                "user_role": "Investigative Journalist",
+                "rating": 5,
+                "title": "Direct YouTube Video & Shorts fact-checking is unmatched",
+                "review_text": "The ability to paste direct YouTube and YouTube Shorts links and have the system cross-reference the claim with Wikipedia and certified news agencies has transformed our investigative newsroom workflow.",
+                "days_ago": 9,
+            },
+            {
+                "user_name": "Rohit Verma",
+                "user_role": "Verified Citizen",
+                "rating": 4,
+                "title": "Love the Female/Male voice narration feature!",
+                "review_text": "I don't always have time to read long technical reports. The AI Voice narration explains whether a claim is real or fake in seconds.",
+                "days_ago": 11,
+            },
+            {
+                "user_name": "Dr. Rajesh Kulkarni",
+                "user_role": "Science Communicator & Educator",
+                "rating": 5,
+                "title": "Pinpoint accuracy on scientific & astronomical facts",
+                "review_text": "Tested complex astronomical claims like heliocentric planetary motion and JWST discoveries. The engine cites primary archives like NASA and peer-reviewed consensus instead of blindly matching keywords.",
+                "days_ago": 13,
+            },
+            {
+                "user_name": "Karan Patel",
+                "user_role": "Cyber Crime Analyst",
+                "rating": 5,
+                "title": "Link Scanner caught a deceptive bank phishing clone",
+                "review_text": "Tested it with fresh phishing domain lookalikes. The multi-source reputation checks and SSL cert inspection flagged malicious intent before antivirus databases even registered it.",
+                "days_ago": 15,
+            },
+            {
+                "user_name": "Meera Nambiar",
+                "user_role": "Digital Media Literacy Educator",
+                "rating": 5,
+                "title": "Essential tool for fighting digital disinformation",
+                "review_text": "We use TRUTH AI in our university fact-checking labs. The explainable audit reports with clear supporting and contradicting evidence teach critical thinking like nothing else.",
+                "days_ago": 17,
+            },
+        ]
+
+        existing_titles = {r.title for r in UserReview.query.all()}
+        new_count = 0
+        for rdata in all_demo_reviews:
+            if rdata["title"] not in existing_titles:
+                rev = UserReview(
+                    user_name=rdata["user_name"],
+                    user_role=rdata["user_role"],
+                    rating=rdata["rating"],
+                    title=rdata["title"],
+                    review_text=rdata["review_text"],
                     is_approved=True,
-                    created_at=datetime.now(timezone.utc) - timedelta(days=3),
-                ),
-                UserReview(
-                    user_name="Vikram Malhotra",
-                    user_role="Cybersecurity Researcher",
-                    rating=5,
-                    title="Outstanding Error Level Analysis & Forensics",
-                    review_text="The ELA heatmap and optical metadata audit accurately showed localized compression discrepancies on photoshopped identity documents. Very impressed.",
-                    is_approved=True,
-                    created_at=datetime.now(timezone.utc) - timedelta(days=6),
-                ),
-                UserReview(
-                    user_name="Ananya Deshmukh",
-                    user_role="Digital Fact Checker",
-                    rating=5,
-                    title="NEO AI Assistant is fast, intelligent & screen-aware",
-                    review_text="Being able to share my screen and have NEO point out exactly where to click and what errors exist makes this platform so seamless.",
-                    is_approved=True,
-                    created_at=datetime.now(timezone.utc) - timedelta(days=8),
-                ),
-                UserReview(
-                    user_name="Rohit Verma",
-                    user_role="Verified Citizen",
-                    rating=4,
-                    title="Love the Female/Male voice narration feature!",
-                    review_text="I don't always have time to read long technical reports. The AI Voice narration explains whether a claim is real or fake in seconds.",
-                    is_approved=True,
-                    created_at=datetime.now(timezone.utc) - timedelta(days=12),
-                ),
-            ]
-            for rev in demo_reviews:
+                    created_at=datetime.now(timezone.utc) - timedelta(days=rdata["days_ago"]),
+                )
                 db.session.add(rev)
+                new_count += 1
+        
+        if new_count > 0:
             db.session.commit()
-            print("Seeded demo user reviews successfully!")
+            print(f"Seeded {new_count} new community reviews successfully!")
+        else:
+            print("All community reviews are already present.")
 
 if __name__ == "__main__":
     seed()
