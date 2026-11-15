@@ -498,6 +498,33 @@ def submit_review():
     db.session.add(review)
     db.session.commit()
 
+    # Log review to server output so it is permanently captured in Render runtime logs
+    print(f"\n[USER_REVIEW_SUBMITTED] Name='{name}' | Role='{role}' | Rating={rating} | Title='{title}' | Text='{review_text}'\n", flush=True)
+
+    # Local JSON backup safeguard (persists submissions across restarts)
+    if not current_app.config.get("TESTING"):
+        try:
+            import json
+            from datetime import datetime, timezone
+            backup_path = Path(current_app.root_path) / "database" / "reviews_backup.json"
+            backup_path.parent.mkdir(parents=True, exist_ok=True)
+            items = []
+            if backup_path.exists():
+                with open(backup_path, "r", encoding="utf-8") as f:
+                    items = json.load(f)
+            items.append({
+                "name": name,
+                "role": role,
+                "rating": rating,
+                "title": title,
+                "review_text": review_text,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
+            with open(backup_path, "w", encoding="utf-8") as f:
+                json.dump(items, f, indent=2)
+        except Exception as ex:
+            print(f"[BACKUP_WARNING] Failed to write review backup: {ex}", flush=True)
+
     return jsonify({
         "success": True,
         "message": "Thank you! Your review has been published.",

@@ -245,7 +245,35 @@ def seed():
                     created_at=datetime.now(timezone.utc) - timedelta(days=rdata["days_ago"]),
                 )
                 db.session.add(rev)
+                existing_titles.add(rdata["title"])
                 new_count += 1
+
+        # Also restore any user reviews saved in reviews_backup.json
+        backup_file = app.config.get("BASE_DIR", app.root_path)
+        from pathlib import Path
+        backup_json = Path(backup_file) / "database" / "reviews_backup.json"
+        if backup_json.exists():
+            try:
+                import json
+                with open(backup_json, "r", encoding="utf-8") as bf:
+                    backed_up = json.load(bf)
+                for item in backed_up:
+                    t = item.get("title", "").strip()
+                    if t and t not in existing_titles:
+                        rev = UserReview(
+                            user_name=item.get("name", "Verified User"),
+                            user_role=item.get("role", "Community Member"),
+                            rating=int(item.get("rating", 5)),
+                            title=t,
+                            review_text=item.get("review_text", ""),
+                            is_approved=True,
+                            created_at=datetime.now(timezone.utc),
+                        )
+                        db.session.add(rev)
+                        existing_titles.add(t)
+                        new_count += 1
+            except Exception as e:
+                print(f"Note: Could not parse reviews_backup.json: {e}")
         
         if new_count > 0:
             db.session.commit()

@@ -5,10 +5,12 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
-db_env = os.environ.get("DATABASE_URL", "")
+db_env = os.environ.get("DATABASE_URL", "").strip()
 if db_env and not db_env.startswith("sqlite:///:memory:"):
-    # If custom sqlite path or relative, resolve against BASE_DIR
-    if db_env.startswith("sqlite:///"):
+    # Render and Heroku use 'postgres://' which SQLAlchemy 1.4+ rejects; rewrite to 'postgresql://'
+    if db_env.startswith("postgres://"):
+        DB_URI = db_env.replace("postgres://", "postgresql://", 1)
+    elif db_env.startswith("sqlite:///"):
         clean_path = db_env.replace("sqlite:///", "")
         if not Path(clean_path).is_absolute():
             resolved_db = (BASE_DIR / clean_path).resolve()
