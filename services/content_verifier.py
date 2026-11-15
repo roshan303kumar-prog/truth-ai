@@ -37,6 +37,16 @@ VERIFIED_NEWS_SOURCES = {
     "apnews.com": {"name": "Associated Press (AP)", "tier": "Global News Agency", "trust": 98},
     "afp.com": {"name": "Agence France-Presse (AFP)", "tier": "Global News Agency", "trust": 96},
     "bloomberg.com": {"name": "Bloomberg News", "tier": "Global Financial News", "trust": 92},
+    "wsj.com": {"name": "The Wall Street Journal", "tier": "Major Financial Daily", "trust": 94},
+    "ft.com": {"name": "Financial Times", "tier": "Global Financial Daily", "trust": 94},
+    "cnbc.com": {"name": "CNBC", "tier": "Financial & Business News", "trust": 90},
+    "forbes.com": {"name": "Forbes", "tier": "Business & Financial Media", "trust": 88},
+    "moneycontrol.com": {"name": "Moneycontrol", "tier": "Financial Markets Daily", "trust": 89},
+    "msn.com": {"name": "MSN (Microsoft News Network)", "tier": "Major News Aggregator", "trust": 88},
+    "microsoft.com": {"name": "Microsoft News", "tier": "Verified Tech & Media", "trust": 90},
+    "yahoo.com": {"name": "Yahoo News / Finance", "tier": "Major News Aggregator", "trust": 87},
+    "techcrunch.com": {"name": "TechCrunch", "tier": "Technology News", "trust": 88},
+    "theverge.com": {"name": "The Verge", "tier": "Technology News", "trust": 88},
     "nytimes.com": {"name": "The New York Times", "tier": "International Daily", "trust": 90},
     "washingtonpost.com": {"name": "The Washington Post", "tier": "International Daily", "trust": 90},
     "theguardian.com": {"name": "The Guardian", "tier": "International News", "trust": 90},
@@ -174,17 +184,34 @@ class ContentLinkVerifier:
                 soup = BeautifulSoup(resp.text, "html.parser")
                 info["fetched_online"] = True
 
-                # 1. Extract Title
-                title_elem = (
-                    soup.find("meta", property="og:title")
-                    or soup.find("meta", attrs={"name": "twitter:title"})
-                    or soup.find("h1")
-                    or soup.find("title")
-                )
-                if title_elem:
-                    info["title"] = (title_elem.get("content") or title_elem.get_text() or "").strip()
+                # 1. Check JSON-LD structured data first for clean headline
+                for s_tag in soup.find_all("script", type="application/ld+json"):
+                    try:
+                        raw_ld = s_tag.string or s_tag.get_text()
+                        if raw_ld:
+                            ld_data = json.loads(raw_ld)
+                            if isinstance(ld_data, list) and ld_data:
+                                ld_data = ld_data[0]
+                            if isinstance(ld_data, dict):
+                                h = ld_data.get("headline") or ld_data.get("name")
+                                if h and isinstance(h, str) and len(h.strip()) > 10:
+                                    info["title"] = h.strip()
+                                    break
+                    except Exception:
+                        pass
 
-                # 2. Extract Description / Summary
+                # 2. Extract Title from standard meta tags if not already found via JSON-LD
+                if not info["title"]:
+                    title_elem = (
+                        soup.find("meta", property="og:title")
+                        or soup.find("meta", attrs={"name": "twitter:title"})
+                        or soup.find("h1")
+                        or soup.find("title")
+                    )
+                    if title_elem:
+                        info["title"] = (title_elem.get("content") or title_elem.get_text() or "").strip()
+
+                # 3. Extract Description / Summary
                 desc_elem = (
                     soup.find("meta", property="og:description")
                     or soup.find("meta", attrs={"name": "description"})
@@ -193,12 +220,12 @@ class ContentLinkVerifier:
                 if desc_elem:
                     info["description"] = (desc_elem.get("content") or "").strip()
 
-                # 3. Extract Publisher
+                # 4. Extract Publisher
                 site_elem = soup.find("meta", property="og:site_name")
                 if site_elem and site_elem.get("content"):
                     info["publisher"] = site_elem.get("content").strip()
 
-                # 4. Extract Article Paragraphs
+                # 5. Extract Article Paragraphs
                 paragraphs = [p.get_text().strip() for p in soup.find_all("p") if len(p.get_text().strip()) > 40]
                 if paragraphs:
                     info["body_snippet"] = " ".join(paragraphs[:4])[:600]
@@ -206,18 +233,51 @@ class ContentLinkVerifier:
         except Exception:
             pass
 
-        # Smart Fallback from URL slug if title not found or site blocked
-        if not info["title"]:
-            slug = parsed.path.rstrip("/").split("/")[-1]
-            # Replace dashes/underscores with spaces
-            cleaned_slug = re.sub(r"[\-_]+", " ", slug)
-            cleaned_slug = re.sub(r"\.html?|\.php|\.aspx?", "", cleaned_slug, flags=re.IGNORECASE)
-            # Remove trailing numeric IDs
-            cleaned_slug = re.sub(r"\b\d{4,}\b", "", cleaned_slug).strip()
-            if len(cleaned_slug) > 8:
-                info["title"] = cleaned_slug.title()
-            else:
+        # Filter out generic default titles (e.g. "MSN", "Home", "Index", "Microsoft Start")
+        GENERIC_TITLES = {
+            "msn", "microsoft start", "home", "homepage", "index", "news", "breaking news",
+            "article", "articles", "yahoo", "google news", "bing news", "welcome", "latest news", "top stories"
+        }
+        title_norm = (info["title"] or "").lower().strip()
+        is_generic = (not info["title"]) or (title_norm in GENERIC_TITLES) or (title_norm == host)
+
+        # Smart Fallback from URL slug if title is generic, blocked, or JS-rendered
+        if is_generic:
+            raw_segments = [s for s in parsed.path.strip("/").split("/") if s]
+            candidates = []
+            for seg in raw_segments:
+                # Skip language codes like en-in, en-us, hi-in
+                if re.match(r"^[a-z]{2}(-[a-z]{2,4})?$", seg, re.IGNORECASE):
+                    continue
+                # Skip short generic folder names
+                if seg.lower() in [
+                    "news", "article", "articles", "story", "stories", "money",
+                    "top-stocks", "markets", "tech", "india", "world", "politics", "view"
+                ]:
+                    continue
+                # Skip ID-only patterns like ar-AA2hukKy or numeric IDs
+                if re.match(r"^ar-[a-zA-Z0-9]+$", seg, re.IGNORECASE) or re.match(r"^\d+$", seg):
+                    continue
+
+                words = re.findall(r"[a-zA-Z0-9]+", seg)
+                if len(words) >= 3:
+                    candidates.append((len(words), seg))
+
+            if candidates:
+                candidates.sort(key=lambda x: x[0], reverse=True)
+                best_slug = candidates[0][1]
+                cleaned_slug = re.sub(r"[\-_]+", " ", best_slug)
+                cleaned_slug = re.sub(r"\.html?|\.php|\.aspx?", "", cleaned_slug, flags=re.IGNORECASE)
+                cleaned_slug = re.sub(r"\b\d{5,}\b", "", cleaned_slug).strip()
+                if len(cleaned_slug) > 8:
+                    info["title"] = cleaned_slug.title()
+
+            if not info["title"] or (info["title"].lower().strip() in GENERIC_TITLES):
                 info["title"] = f"Report on {info['publisher']}"
+
+        # If description is still empty, synthesize basic context from title
+        if not info["description"] and info["title"]:
+            info["description"] = f"News report published by {info['publisher']}: {info['title']}"
 
         return info
 
@@ -344,6 +404,7 @@ class ContentLinkVerifier:
             "verdict": final_verdict,
             "verdict_class": verdict_class,
             "authenticity_score": authenticity_score,
+            "confidence_score": authenticity_score,
             "source_trust_score": source_trust_score,
             "source_badge": source_badge,
             "explanation": summary_statement,

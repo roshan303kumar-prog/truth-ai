@@ -88,6 +88,7 @@ def verify_news():
     res_payload = result.copy()
     res_payload["report_id"] = report.id
     res_payload["success"] = True
+    res_payload["confidence_score"] = conf_score
     return jsonify(res_payload), 200
 
 
@@ -106,13 +107,14 @@ def verify_link():
     result = verifier.verify_link(url)
 
     # Persist report in database
+    conf_score = float(100 - result["risk_score"])
     report = VerificationReport(
         user_id=current_user.id if current_user.is_authenticated else None,
         verification_type="link",
         title_or_claim=f"Link Scan: {result['hostname']}"[:450],
         submitted_content=url,
         verdict=result["verdict"],
-        confidence_score=float(100 - result["risk_score"]),
+        confidence_score=conf_score,
         explanation=result["explanation"],
     )
     report.supporting_evidence = [{"title": f, "source": "Security Heuristic"} for f in result.get("positive_flags", [])]
@@ -139,6 +141,7 @@ def verify_link():
     res_payload = result.copy()
     res_payload["report_id"] = report.id
     res_payload["success"] = True
+    res_payload["confidence_score"] = conf_score
     return jsonify(res_payload), 200
 
 
@@ -157,13 +160,14 @@ def verify_content_link():
     result = verifier.verify_content_link(url)
 
     # Persist report in database
+    conf_score = float(result.get("authenticity_score", 50.0))
     report = VerificationReport(
         user_id=current_user.id if current_user.is_authenticated else None,
         verification_type="video_link" if result.get("is_video") else "news_link",
         title_or_claim=f"{result.get('content_type', 'Link')}: {result.get('title', '')}"[:450],
         submitted_content=url,
         verdict=result["verdict"],
-        confidence_score=float(result.get("authenticity_score", 50.0)),
+        confidence_score=conf_score,
         explanation=result["explanation"],
     )
     report.supporting_evidence = result.get("supporting_evidence", [])
@@ -190,6 +194,7 @@ def verify_content_link():
     res_payload = result.copy()
     res_payload["report_id"] = report.id
     res_payload["success"] = True
+    res_payload["confidence_score"] = conf_score
     return jsonify(res_payload), 200
 
 

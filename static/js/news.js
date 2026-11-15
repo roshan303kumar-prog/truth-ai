@@ -75,16 +75,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function getBadgeClass(verdict) {
-    if (verdict.includes("Supported")) return "badge-supported";
-    if (verdict.includes("False")) return "badge-false";
+    if (!verdict) return "badge-insufficient";
+    if (verdict.includes("Supported") || verdict.includes("Authentic") || verdict.includes("Verified")) return "badge-supported";
+    if (verdict.includes("False") || verdict.includes("Debunked")) return "badge-false";
     if (verdict.includes("Misleading")) return "badge-misleading";
     if (verdict.includes("Unverified")) return "badge-unverified";
     return "badge-insufficient";
 }
 
 function getVerdictIcon(verdict) {
-    if (verdict.includes("Supported")) return "fa-circle-check";
-    if (verdict.includes("False")) return "fa-circle-xmark";
+    if (!verdict) return "fa-circle-info";
+    if (verdict.includes("Supported") || verdict.includes("Authentic") || verdict.includes("Verified")) return "fa-circle-check";
+    if (verdict.includes("False") || verdict.includes("Debunked")) return "fa-circle-xmark";
     if (verdict.includes("Misleading")) return "fa-triangle-exclamation";
     if (verdict.includes("Unverified")) return "fa-circle-question";
     return "fa-circle-info";
@@ -103,19 +105,37 @@ function renderNewsResult(data) {
     const limitationsList = document.getElementById("res-limitations-list");
     const fullReportBtn = document.getElementById("res-full-report-link");
 
+    // Extracted Link Meta Box
+    const linkMetaBox = document.getElementById("res-link-meta-box");
+    const linkPublisher = document.getElementById("res-link-publisher");
+    const linkType = document.getElementById("res-link-type");
+    const linkTitle = document.getElementById("res-link-title");
+
+    if (linkMetaBox && data.title && (data.publisher || data.host)) {
+        linkMetaBox.style.display = "block";
+        linkTitle.textContent = data.title;
+        linkPublisher.textContent = `Source: ${data.publisher || data.host}`;
+        if (linkType) {
+            linkType.innerHTML = data.is_video ? '<i class="fa-brands fa-youtube me-1 text-danger"></i> Online Video' : '<i class="fa-solid fa-newspaper me-1 text-info"></i> News Article';
+        }
+    } else if (linkMetaBox) {
+        linkMetaBox.style.display = "none";
+    }
+
     // Verdict
     const badgeClass = getBadgeClass(data.verdict);
     verdictBadge.className = `verdict-badge ${badgeClass}`;
     verdictIcon.className = `fa-solid ${getVerdictIcon(data.verdict)}`;
     verdictText.textContent = data.verdict;
 
-    // Confidence
-    const score = Math.round(data.confidence_score);
+    // Confidence Calculation (Never NaN)
+    const rawScore = Number(data.confidence_score ?? data.authenticity_score ?? 50);
+    const score = isNaN(rawScore) ? 50 : Math.round(rawScore);
     confidenceScore.textContent = `${score}%`;
     confidenceBar.style.width = `${score}%`;
-    if (data.verdict && data.verdict.includes("Supported")) {
+    if (data.verdict && (data.verdict.includes("Supported") || data.verdict.includes("Authentic") || data.verdict.includes("Verified"))) {
         confidenceBar.style.backgroundColor = "#10b981";
-    } else if (data.verdict && data.verdict.includes("False")) {
+    } else if (data.verdict && (data.verdict.includes("False") || data.verdict.includes("Debunked"))) {
         confidenceBar.style.backgroundColor = "#ef4444";
     } else if (data.verdict && data.verdict.includes("Misleading")) {
         confidenceBar.style.backgroundColor = "#f59e0b";
