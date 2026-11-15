@@ -83,12 +83,29 @@ VERIFIED_YOUTUBE_NEWS_CHANNELS = {
     "sansad tv": {"tier": "Official Parliament Channel", "trust": 98},
     "abp news": {"tier": "National News Network", "trust": 88},
     "zee news": {"tier": "National News Network", "trust": 88},
+    "news 24": {"tier": "National Hindi Broadcaster", "trust": 88},
+    "news24": {"tier": "National Hindi Broadcaster", "trust": 88},
+    "india tv": {"tier": "National Hindi Broadcaster", "trust": 88},
+    "indiatv": {"tier": "National Hindi Broadcaster", "trust": 88},
+    "republic bharat": {"tier": "National Hindi Broadcaster", "trust": 88},
+    "republic world": {"tier": "National News Network", "trust": 88},
+    "tv9 bharatvarsh": {"tier": "National Hindi Broadcaster", "trust": 88},
+    "tv9": {"tier": "National News Network", "trust": 88},
+    "times now navbharat": {"tier": "National Hindi Broadcaster", "trust": 88},
+    "times now": {"tier": "National English News", "trust": 89},
+    "news nation": {"tier": "National Hindi Broadcaster", "trust": 86},
     "news18": {"tier": "National News Network", "trust": 88},
     "news18 india": {"tier": "National News Network", "trust": 88},
     "wion": {"tier": "International News Channel", "trust": 89},
     "the lallantop": {"tier": "Verified Digital Newsroom", "trust": 88},
     "the print": {"tier": "Verified Digital News", "trust": 88},
     "ani news": {"tier": "National News Agency", "trust": 90},
+    "ibc24": {"tier": "Regional Hindi Broadcaster", "trust": 86},
+    "bharat 24": {"tier": "National Hindi Broadcaster", "trust": 86},
+    "firstpost": {"tier": "Digital News Platform", "trust": 88},
+    "et now swadesh": {"tier": "Financial Hindi News", "trust": 89},
+    "cnbc awaaz": {"tier": "Financial Hindi News", "trust": 90},
+    "zee business": {"tier": "Financial Hindi News", "trust": 90},
 
     # Major Global TV & Broadcast Networks
     "abc news": {"tier": "Major US National Broadcaster", "trust": 94},
@@ -434,9 +451,12 @@ class ContentLinkVerifier:
                 source_category = "Humor / Disinformation"
                 break
 
-        # 3. Linguistic & Clickbait Check on Headline
+        # 3. Linguistic, Clickbait & Editorial Format Analysis
         combined_text = f"{headline_or_claim} {content_summary}".strip()
         linguistics = self.news_verifier.analyze_linguistics(combined_text)
+
+        # Detect Journalistic Debate / Opinion Question format vs Statement
+        is_debate_or_question = bool(re.search(r"(\?|क्या\s|kya\s|\bdebate\b|\brashtra ki baat\b|\bdna\b|\bdangal\b|\bmaster stroke\b)", headline_or_claim, re.IGNORECASE))
 
         if is_video and not matched_source and linguistics.get("sensationalism_detected"):
             source_trust_score = max(source_trust_score - 15, 25)
@@ -446,21 +466,31 @@ class ContentLinkVerifier:
         eval_claim = headline_or_claim if len(headline_or_claim) > 10 else combined_text
         fact_check_result = self.news_verifier.verify_claim(eval_claim)
 
-        # 5. Composite Authenticity Calculation
-        # Combine: Source Trust (40%) + Fact-Check Confidence (60%)
+        # 5. Composite Dynamic Authenticity Calculation
         fc_confidence = fact_check_result.get("confidence_score", 50.0)
         fc_verdict = fact_check_result.get("verdict", "Unverified")
+        claim_tokens = self.news_verifier.extract_keywords(eval_claim)
+        total_ev = len(fact_check_result.get("source_links", []))
 
         if is_satire_or_hoax:
             final_verdict = "Fake News / Satire"
             authenticity_score = 12.0
             verdict_class = "danger"
             summary_statement = f"This content is published by {publisher_name}, a recognized satire or fabricated hoax outlet. The claims are not real news."
-        elif matched_source and matched_source["trust"] >= 88 and fc_verdict not in ["False", "Manipulated"]:
-            final_verdict = "Verified Authentic"
-            authenticity_score = round(max(fc_confidence, 88.0), 1)
-            verdict_class = "success"
-            summary_statement = f"Reported by {publisher_name} ({matched_source['tier']}). The news coverage is supported by corroborated media reports."
+        elif matched_source and matched_source["trust"] >= 86 and fc_verdict not in ["False", "Manipulated"]:
+            if is_debate_or_question:
+                final_verdict = "Verified Broadcast Debate"
+                authenticity_score = round(min(matched_source["trust"] + min(total_ev * 1.5, 4.0), 94.0), 1)
+                verdict_class = "success"
+                summary_statement = (
+                    f"Televised journalistic debate/report on {publisher_name} ({matched_source['tier']}). "
+                    "The coverage poses editorial debate questions regarding current political affairs on an accredited national broadcast network."
+                )
+            else:
+                final_verdict = "Verified Authentic"
+                authenticity_score = round(max(fc_confidence, float(matched_source["trust"])), 1)
+                verdict_class = "success"
+                summary_statement = f"Reported by {publisher_name} ({matched_source['tier']}). The news coverage is supported by corroborated media reports."
         elif fc_verdict in ["False", "Manipulated"]:
             final_verdict = "Debunked / False Claim"
             authenticity_score = round(min(fc_confidence, 25.0), 1)
@@ -472,9 +502,20 @@ class ContentLinkVerifier:
             verdict_class = "warning"
             summary_statement = "The story contains misleading context, exaggeration, or partial information that does not align with established facts."
         else:
-            # Neutral / Unverified
+            # Dynamic calculation for unverified channels: varies naturally based on entities, context & tone
             final_verdict = "Unverified / Needs Corroboration"
-            authenticity_score = round((source_trust_score * 0.4) + (fc_confidence * 0.6), 1)
+            dynamic_base = float(source_trust_score)
+
+            if linguistics.get("sensationalism_detected"):
+                dynamic_base -= 10.0
+            else:
+                dynamic_base += 4.0
+
+            entity_bonus = min(len(claim_tokens) * 1.8, 10.0)
+            context_bonus = min(total_ev * 3.0, 12.0)
+
+            raw_score = dynamic_base + entity_bonus + context_bonus
+            authenticity_score = round(max(min(raw_score, 78.0), 32.0), 1)
             verdict_class = "warning" if authenticity_score < 70 else "success"
             summary_statement = f"The content from {publisher_name} requires independent verification. Exercise critical reading before sharing."
 
