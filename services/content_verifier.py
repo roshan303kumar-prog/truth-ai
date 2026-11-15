@@ -74,12 +74,11 @@ KNOWN_SATIRE_OR_HOAX_SITES = {
 
 # Verified Indian & Global YouTube News Channels & Public Broadcasters
 VERIFIED_YOUTUBE_NEWS_CHANNELS = {
+    # Indian Accredited Broadcasters
     "aaj tak": {"tier": "National Hindi Broadcaster", "trust": 90},
     "india today": {"tier": "National News Network", "trust": 90},
     "ndtv": {"tier": "National News Network", "trust": 90},
     "ndtv india": {"tier": "National Hindi News", "trust": 90},
-    "bbc news": {"tier": "International Public Broadcaster", "trust": 95},
-    "bbc news hindi": {"tier": "International Public Broadcaster", "trust": 95},
     "dd news": {"tier": "National Public Broadcaster", "trust": 96},
     "sansad tv": {"tier": "Official Parliament Channel", "trust": 98},
     "abp news": {"tier": "National News Network", "trust": 88},
@@ -87,15 +86,28 @@ VERIFIED_YOUTUBE_NEWS_CHANNELS = {
     "news18": {"tier": "National News Network", "trust": 88},
     "news18 india": {"tier": "National News Network", "trust": 88},
     "wion": {"tier": "International News Channel", "trust": 89},
-    "reuters": {"tier": "Global News Agency", "trust": 98},
-    "associated press": {"tier": "Global News Agency", "trust": 98},
-    "ani news": {"tier": "National News Agency", "trust": 90},
     "the lallantop": {"tier": "Verified Digital Newsroom", "trust": 88},
     "the print": {"tier": "Verified Digital News", "trust": 88},
+    "ani news": {"tier": "National News Agency", "trust": 90},
+
+    # Major Global TV & Broadcast Networks
+    "abc news": {"tier": "Major US National Broadcaster", "trust": 94},
+    "cbs news": {"tier": "Major US National Broadcaster", "trust": 94},
+    "nbc news": {"tier": "Major US National Broadcaster", "trust": 94},
+    "cnn": {"tier": "Global Cable News Network", "trust": 88},
+    "bbc news": {"tier": "International Public Broadcaster", "trust": 95},
+    "bbc news hindi": {"tier": "International Public Broadcaster", "trust": 95},
+    "reuters": {"tier": "Global News Agency", "trust": 98},
+    "associated press": {"tier": "Global News Agency", "trust": 98},
+    "sky news": {"tier": "International News Network", "trust": 90},
+    "france 24": {"tier": "International Public Broadcaster", "trust": 92},
     "dw news": {"tier": "International Public Broadcaster", "trust": 94},
     "al jazeera english": {"tier": "International News", "trust": 90},
     "cnbc": {"tier": "Financial News Channel", "trust": 92},
     "cnbc-tv18": {"tier": "Financial News Channel", "trust": 92},
+    "bloomberg": {"tier": "Global Financial Broadcast", "trust": 94},
+    "pbs newshour": {"tier": "US Public Broadcaster", "trust": 96},
+    "fox news": {"tier": "Major US Cable News Network", "trust": 86},
 }
 
 
