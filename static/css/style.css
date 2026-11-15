@@ -204,32 +204,74 @@ a:hover {
   color: #ffffff;
 }
 
-/* Forms & Inputs */
+/* Forms & Inputs — High Contrast & Clear Visibility */
+.form-control.truth-input,
+.form-select.truth-input,
 .truth-input,
 .truth-textarea,
 .truth-select {
-  background-color: var(--bg-input);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  background-color: #0c1427 !important;
+  border: 1.5px solid rgba(56, 189, 248, 0.25) !important;
+  color: #ffffff !important;
+  caret-color: #00e5ff !important;
   border-radius: var(--radius-sm);
   padding: 0.85rem 1.1rem;
   font-size: 1rem;
+  font-weight: 500;
   transition: var(--transition);
   width: 100%;
 }
 
+.form-control.truth-input:focus,
+.form-select.truth-input:focus,
 .truth-input:focus,
 .truth-textarea:focus,
 .truth-select:focus {
-  outline: none;
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.15);
-  background-color: #0d1629;
+  outline: none !important;
+  border-color: #00e5ff !important;
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.25) !important;
+  background-color: #0f1c38 !important;
+  color: #ffffff !important;
 }
 
+.form-control.truth-input::placeholder,
 .truth-input::placeholder,
 .truth-textarea::placeholder {
-  color: var(--text-dim);
+  color: #94a3b8 !important;
+  opacity: 0.85;
+}
+
+/* Modal Content & Input Specific Fixes */
+.modal-content.truth-card {
+  background-color: #070d1c !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7) !important;
+}
+
+.modal-content .form-label {
+  color: #f1f5f9 !important;
+  font-weight: 600 !important;
+}
+
+.modal-content select.truth-input option {
+  background-color: #070d1c !important;
+  color: #ffffff !important;
+  padding: 8px;
+}
+
+/* Prevent browser autofill from making inputs light with dark text */
+.truth-input:-webkit-autofill,
+.truth-input:-webkit-autofill:hover,
+.truth-input:-webkit-autofill:focus,
+.truth-textarea:-webkit-autofill,
+.truth-textarea:-webkit-autofill:hover,
+.truth-textarea:-webkit-autofill:focus,
+.form-control.truth-input:-webkit-autofill,
+.form-control.truth-input:-webkit-autofill:hover,
+.form-control.truth-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px #0c1427 inset !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Hero Section */

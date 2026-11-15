@@ -2,6 +2,45 @@
 
 {% block title %}User Reviews & Ratings — TRUTH AI{% endblock %}
 
+{% block extra_css %}
+<style>
+  #reviewModal .modal-content {
+    background-color: #070d1c !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  }
+  #reviewModal .truth-input,
+  #reviewModal input.form-control,
+  #reviewModal select.form-select,
+  #reviewModal textarea.form-control {
+    background-color: #0c1427 !important;
+    color: #ffffff !important;
+    border: 1.5px solid rgba(56, 189, 248, 0.35) !important;
+    caret-color: #00e5ff !important;
+    font-size: 0.95rem !important;
+  }
+  #reviewModal .truth-input:focus,
+  #reviewModal input.form-control:focus,
+  #reviewModal select.form-select:focus,
+  #reviewModal textarea.form-control:focus {
+    background-color: #0f1c38 !important;
+    color: #ffffff !important;
+    border-color: #00e5ff !important;
+    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.25) !important;
+    outline: none !important;
+  }
+  #reviewModal .truth-input::placeholder,
+  #reviewModal input.form-control::placeholder,
+  #reviewModal textarea.form-control::placeholder {
+    color: #94a3b8 !important;
+    opacity: 0.9 !important;
+  }
+  #reviewModal select.form-select option {
+    background-color: #070d1c !important;
+    color: #ffffff !important;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
     <!-- Header -->
